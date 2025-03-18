@@ -186,6 +186,14 @@ void button_handler(struct button_obj_t* button)
         }
 
     }
+     /** 2025/3/18 UESTC_Turtle_Modify **/
+    //发现key_value在按键保持释放的时候不会自己清零，导致如果采用在主循环查询key_value的方式的话，会无法检测下一次相同事件的到来。
+    //例如，第一次单击之后，下一次单击会检测不到
+    //添加key_value清零操作，暂时还没想到更好的添加位置
+    else if(button->state_bits == 0){ //如果状态位为0
+          button->key_value = 0;
+    }
+    /***********************************/
 }
 
 /**
