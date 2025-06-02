@@ -1,0 +1,28 @@
+{
+    "mappings": [
+        {
+            "id": "btn1",
+            "key": "a",
+            "color": "red",
+            "btn_number": 0
+        },
+        {
+            "id": "btn2",
+            "key": "b",
+            "color": "blue",
+            "btn_number": 1
+        },
+        {
+            "id": "btn3",
+            "key": "c",
+            "color": "orange",
+            "btn_number": 2
+        },
+        {
+            "id": "btn4",
+            "key": "d",
+            "color": "yellow",
+            "btn_number": 3
+        }
+    ]
+}

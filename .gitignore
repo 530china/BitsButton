@@ -54,3 +54,8 @@ dkms.conf
 # vscode
 .vscode
 
+# python
+__pycache__/
+*.pyc
+
+output/
