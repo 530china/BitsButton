@@ -1,23 +1,52 @@
-#include "embedded_button.h"
+#include "bits_button.h"
 
-enum button_id_e {
-    btn1_id = 0,
-    btn2_id,
+typedef enum
+{
+    USER_BUTTON_0 = 0,
+    USER_BUTTON_1,
+    USER_BUTTON_2,
+    USER_BUTTON_3,
+    USER_BUTTON_4,
+    USER_BUTTON_5,
+    USER_BUTTON_6,
+    USER_BUTTON_7,
+    USER_BUTTON_8,
+    USER_BUTTON_9,
+    USER_BUTTON_INVALID,
+    USER_BUTTON_MAX,
+
+    USER_BUTTON_COMBO_0 = 0x100,
+    USER_BUTTON_COMBO_1,
+    USER_BUTTON_COMBO_2,
+    USER_BUTTON_COMBO_3,
+    USER_BUTTON_COMBO_MAX,
+} user_button_t;
+
+static const bits_btn_obj_param_t defaul_param = {.long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+                                                  .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
+                                                  .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
+                                                  .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
+
+button_obj_t btns[] =
+{
+BITS_BUTTON_INIT(USER_BUTTON_0, 1, &defaul_param),
+BITS_BUTTON_INIT(USER_BUTTON_1, 1, &defaul_param),
+// BITS_BUTTON_INIT(USER_BUTTON_2, 1, &defaul_param),
 };
 
-struct button_obj_t button1;
-struct button_obj_t button2;
-
-uint8_t read_button_pin(uint8_t button_id)
+button_obj_combo_t btns_combo[] =
 {
+BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_0, 1, &defaul_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}), 2, 1),
+};
+
+uint8_t read_key_state(struct button_obj_t *btn)
+{
+    uint8_t _id = btn->key_id;
     // you can share the GPIO read function with multiple Buttons
-    switch(button_id)
+    switch(_id)
     {
-        case btn1_id:
+        case 0:
             return get_button1_value(); //Require self implementation
-            break;
-        case btn2_id:
-            return get_button2_value(); //Require self implementation
             break;
 
         default:
@@ -28,123 +57,68 @@ uint8_t read_button_pin(uint8_t button_id)
     return 0;
 }
 
-void single_click_handle(void* btn)
-{
-    //do something...
-    printf("/****single click****/\r\n");
+int my_log_printf(const char* format, ...) {
+
+    va_list args;
+    va_start(args, format);
+    int result = vprintf(format, args);
+    va_end(args);
+
+    return result;
 }
 
-void double_click_handle(void* btn)
+void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
 {
-    //do something...
-    printf("/****double click****/\r\n");
-}
+    printf("id:%d, event:%d, key_value:%d, long press period trigger cnt:%d \r\n", result.key_id, result.event, result.key_value, result.long_press_period_trigger_cnt);
 
-void long_press_handle(void* btn)
-{
-    //do something...
-    printf("/****long press****/\r\n");
-}
-
-void single_click_then_long_press_handle(void* btn)
-{
-    //do something...
-    printf("/****single click and long press****/\r\n");
-}
-
-void quintuple_click_handle(void* btn)
-{
-    //do something...
-    if(check_is_repeat_click_mode(btn))
-    {// To implement the logic where any key press that occurs five or more times in succession is treated as a five-hit press.
-        printf("/****quintuple click****/\r\n");
+    if(result.event == BTN_STATE_PRESSED)
+    {
+        printf("id:%d pressed \n", result.key_id);
     }
 
-}
-
-void repeat_click_handle(void* btn)
-{
-    //do something...
-    if(check_is_repeat_click_mode(btn))
+    if(result.event == BTN_STATE_RELEASE)
     {
-        printf("/****repeat click****/\r\n");
+        printf("id:%d release\n", result.key_id);
+    }
 
-        if(get_button_key_value(&button2) == 0b1010)
+    if(result.event == BTN_STATE_LONG_PRESS)
+    {
+        if(result.key_value == 0b11)
+            printf("id:%d, long press start\n", result.key_id);
+        else if(result.key_value == 0b111)
         {
-            printf("/****button2 double click****/\r\n");
+            printf("id:%d, long press hold, cnt:%d\n", result.key_id, result.long_press_period_trigger_cnt);
         }
+        else if(result.key_value == 0b1011)
+            printf("id:%d, single click and long press start\n", result.key_id);
+        else if(result.key_value == 0b101011)
+            printf("id:%d, double click and long press start\n", result.key_id);
+    }
 
-        if(get_button_key_value(&button2) == 0b101010)
+    if(result.event == BTN_STATE_FINISH)
+    {
+        switch(result.key_value)
         {
-            printf("/****button2 triple click****/\r\n");
-        }
-
-        if(get_button_key_value(&button2) == 0b10101010)
-        {
-            printf("/****button2 quadruple click****/\r\n");
+        case BITS_BTN_SINGLE_CLICK_KV:
+            printf("id:%d single click\n", result.key_id);
+            break;
+        case BITS_BTN_DOUBLE_CLICK_KV:
+            printf("id:%d double click\n", result.key_id);
+            break;
+        case 0b10111010:
+            printf("id:%d single click and long press then single click\n", result.key_id);
+            break;
         }
     }
 }
-
-void filter_ending_with_long_press_handle(void* btn)
-{
-    printf("/****an event ending with a long press on a key****/\r\n");
-}
-
-const key_value_match_map_t button1_map[] =
-{
-    {
-        .tar_result = SINGLE_CLICK_KV,
-        .kv_func_cb = single_click_handle
-    },
-    {
-        .tar_result = DOUBLE_CLICK_KV,
-        .kv_func_cb = double_click_handle
-    },
-    {
-        .tar_result = LONG_PRESEE_START,
-        .kv_func_cb = long_press_handle
-    },
-    {
-        .tar_result = SINGLE_CLICK_THEN_LONG_PRESS_KV,
-        .kv_func_cb = single_click_then_long_press_handle
-    },
-    {
-        .operand = 0b1010101010,
-        .operator = KV_MATCH_OPERATOR_BITWISE_AND,
-        .tar_result = 0b1010101010,
-        .kv_func_cb = quintuple_click_handle
-    }
-};
-
-const key_value_match_map_t button2_map[] =
-{
-    {
-        .operand = 0b1010,
-        .operator = KV_MATCH_OPERATOR_BITWISE_AND,
-        .tar_result = 0b1010,
-        .kv_func_cb = repeat_click_handle
-    },
-    {
-        .operand = 0b1111,
-        .operator = KV_MATCH_OPERATOR_BITWISE_AND,
-        .tar_result = 0b1110,
-        .kv_func_cb = filter_ending_with_long_press_handle
-    }
-};
-
 
 int main()
 {
-    button_init(&button1, read_button_pin, 0, btn1_id, button1_map, ARRAY_SIZE(button1_map));
-    button_start(&button1);
-
-    button_init(&button2, read_button_pin, 0, btn2_id, button2_map, ARRAY_SIZE(button2_map));
-    button_start(&button2);
+    bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, my_log_printf);
 
     //make the timer invoking the button_ticks() interval 5ms.
     //This function is implemented by yourself.
-    __timer_start(button_ticks, 0, 5);
+    __timer_start(bits_button_ticks, 0, 5);
 
     while(1)
     {}
