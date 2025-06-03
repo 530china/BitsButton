@@ -134,3 +134,4 @@ size_t get_bits_btn_buffer_count(void);
 int32_t bits_btn_is_buffer_full(void);
 int32_t bits_btn_is_buffer_empty(void);
 #endif
+test
