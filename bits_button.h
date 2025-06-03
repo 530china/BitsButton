@@ -2,6 +2,7 @@
 #define __BITS_BUTTON_H__
 
 #include "stdint.h"
+#include "stdio.h"
 
 typedef uint32_t key_value_type_t;
 typedef uint32_t state_bits_type_t;
