@@ -110,8 +110,8 @@ typedef struct {
 <details>
 <summary>点击展开/折叠C代码<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
 
-- [使用callback方式](../examples/example_callback.c);
-- [使用poll方式](../examples/example_poll.c);
+- [使用callback方式](examples/example_callback.c);
+- [使用poll方式](examples/example_poll.c);
 <br></details>
 
 ### 2）调试
