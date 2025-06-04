@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "stdio.h"
+#include "stdbool.h"
 
 typedef uint32_t key_value_type_t;
 typedef uint32_t state_bits_type_t;
@@ -128,9 +129,9 @@ int32_t bits_button_init(button_obj_t* btns                                     
 );
 
 void bits_button_ticks(void);
-int32_t bits_button_get_key_result(bits_btn_result_t *result);
+bool bits_button_get_key_result(bits_btn_result_t *result);
 size_t get_bits_btn_overwrite_count(void);
 size_t get_bits_btn_buffer_count(void);
-int32_t bits_btn_is_buffer_full(void);
-int32_t bits_btn_is_buffer_empty(void);
+bool bits_btn_is_buffer_full(void);
+bool bits_btn_is_buffer_empty(void);
 #endif

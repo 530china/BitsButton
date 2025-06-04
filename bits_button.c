@@ -2,7 +2,6 @@
 #include "bits_button.h"
 #include "string.h"
 #include <stdatomic.h>
-#include <stdbool.h>
 
 // static struct button_obj_t* button_list_head = NULL;
 #define POPCOUNT_TYPE_T button_mask_type_t
@@ -73,7 +72,7 @@ void bits_btn_init_buffer(void)
   * @brief  Check if the ring buffer is empty.
   * @retval true if the buffer is empty, false otherwise.
   */
-int32_t bits_btn_is_buffer_empty()
+ bool bits_btn_is_buffer_empty()
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -86,7 +85,7 @@ int32_t bits_btn_is_buffer_empty()
   * @brief  Check if the ring buffer is full.
   * @retval true if the buffer is full, false otherwise.
   */
-int32_t bits_btn_is_buffer_full()
+bool bits_btn_is_buffer_full()
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -303,10 +302,10 @@ int32_t bits_button_init(button_obj_t* btns                                     
 
 /**
   * @brief  Get the button key result from the buffer.
-  * @param  result: Pointer to store the button key result.
-  * @retval 0 if the result is retrieved successfully, -1 otherwise.
+  * @param  result: Pointer to store the button key result
+  * @retval true if read successfully, false if the buffer is empty.
   */
-int32_t bits_button_get_key_result(bits_btn_result_t *result)
+bool bits_button_get_key_result(bits_btn_result_t *result)
 {
     return bits_btn_read_buffer(result);
 }
