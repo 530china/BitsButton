@@ -1,16 +1,16 @@
 <h1 align="center">BitsButton</h1>
 
 <p align="center">
-<a href="https://github.com/530china/EmbeddedButton/blob/master/LICENSE" target="blank">
+<a href="https://github.com/530china/BitsButton/blob/master/LICENSE" target="blank">
 <img src="https://img.shields.io/github/license/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator license" />
 </a>
-<a href="https://github.com/530china/EmbeddedButton/stargazers" target="blank">
+<a href="https://github.com/530china/BitsButton/stargazers" target="blank">
 <img src="https://img.shields.io/github/stars/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator stars"/>
 </a>
-<a href="https://github.com/530china/EmbeddedButton/issues" target="blank">
+<a href="https://github.com/530china/BitsButton/issues" target="blank">
 <img src="https://img.shields.io/github/issues/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator issues"/>
 </a>
-<a href="https://github.com/530china/EmbeddedButton/pulls" target="blank">
+<a href="https://github.com/530china/BitsButton/pulls" target="blank">
 <img src="https://img.shields.io/github/issues-pr/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator pull-requests"/>
 </a>
 </p>
@@ -141,7 +141,7 @@ bits_button_init(
 <br></details>
 
 ### 3）按键模拟器
-- 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证进行程序的逻辑验证，详情见：[按键模拟器](examples/ButtonSimulator.md)
+- 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证程序的逻辑，详情见：[按键模拟器](examples/ButtonSimulator.md)
 
 ## ⚡ 其他
 - 本项目基于本人实际开发中遇到的一些按键驱动使用体验问题，在他人项目（见参考链接）的思想基础上，开发的此按键检测框架，感谢帮助思考我的小伙伴[shawnfeng0](https://github.com/shawnfeng0)以及正在使用此模块的小伙伴，欢迎一起开发改进！
