@@ -1,0 +1,6 @@
+# 强制 C 文件识别为 C
+*.c linguist-language=C
+*.h linguist-language=C
+
+# 标记所有 Python 脚本为附属文件
+*.py linguist-vendored
