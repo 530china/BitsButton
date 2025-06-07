@@ -109,6 +109,7 @@ typedef struct {
 <details>
 <summary>点击展开/折叠C代码<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
 
+- 首先将bits_button.c和bits_button.h包含进你的工程；
 - [使用callback方式](examples/example_callback.c);
 - [使用poll方式](examples/example_poll.c);
 <br></details>
@@ -152,7 +153,7 @@ bits_button_init(
 - [x] 组合按键支持；
 - [x] 按键结果高性能缓冲区支持；
 - [x] 按键模拟器Window环境支持；
-- [ ] 按键模拟器Linux环境支持；
+- [x] 按键模拟器Linux/macOS环境支持；
 - [ ] 自动化测试框架支持；
 - [ ] 更多应用示例
 
