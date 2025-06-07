@@ -57,5 +57,9 @@ dkms.conf
 # python
 __pycache__/
 *.pyc
+.venv
+venv/
 
+# output
 output/
+build/

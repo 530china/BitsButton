@@ -1,10 +1,66 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, messagebox
 import json
 import logging
 import queue
 import threading
+import os
+import sys
 from pynput import keyboard
+
+class LogWindowHandler(logging.Handler):
+    """自定义线程安全的日志显示器"""
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+        self.log_queue = queue.Queue()
+        self.root = None  # 稍后设置
+        
+        # 启动队列处理线程
+        self.running = True
+        self.thread = threading.Thread(target=self.process_queue, daemon=True)
+        self.thread.start()
+
+    def set_root(self, root):
+        """设置Tk根窗口"""
+        self.root = root
+
+    def emit(self, record):
+        """将日志记录放入队列"""
+        try:
+            msg = self.format(record)
+            self.log_queue.put(msg)
+        except Exception:
+            self.handleError(record)
+
+    def process_queue(self):
+        """处理日志队列"""
+        while self.running:
+            try:
+                msg = self.log_queue.get(timeout=0.1)
+                if self.root:
+                    # 在主线程中安全地更新UI
+                    self.root.after(0, self._update_text_widget, msg)
+            except queue.Empty:
+                continue
+            except Exception:
+                self.handleError(None)
+
+    def _update_text_widget(self, msg):
+        """更新文本组件（在主线程中执行）"""
+        try:
+            self.text_widget.configure(state="normal")
+            self.text_widget.insert(tk.END, msg + "\n")
+            self.text_widget.see(tk.END)
+            self.text_widget.configure(state="disabled")
+        except Exception as e:
+            print(f"更新文本组件失败: {str(e)}")
+
+    def close(self):
+        """关闭处理器"""
+        self.running = False
+        self.thread.join(timeout=1)
+        super().close()
 
 class DynamicKeySimulator:
     def __init__(self, use_hardware=False):
@@ -21,9 +77,18 @@ class DynamicKeySimulator:
 
         # GUI初始化
         self.root = tk.Tk()
-        self.root.title("高级按键模拟器 v3.3")
+        self.root.title("高级按键模拟器 v3.4")
         self._create_ui()
+        
+        # 创建日志处理器
+        self.log_window_handler = LogWindowHandler(self.log_area)
+        self.log_window_handler.setLevel(logging.INFO)
+        
+        # 配置日志系统
         self._setup_logging()
+        
+        # 设置日志处理器的根窗口
+        self.log_window_handler.set_root(self.root)
 
         self._init_hardware_mode()
 
@@ -36,16 +101,47 @@ class DynamicKeySimulator:
 
     def _init_hardware_mode(self):
         """硬件模式初始化"""
-        self.current_mode = "硬件模式" if self.use_hardware else "软件模式"
         if self.use_hardware:
             try:
+                # 获取当前脚本路径
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                
+                # 添加库搜索路径
+                sys.path.insert(0, os.path.join(script_dir, ".."))
+                
+                # 初始化日志信息
+                logging.info("尝试导入硬件模块...")
+                logging.info(f"系统路径: {sys.path}")
+                
+                # 导入硬件控制模块
                 from button_ctrl import ButtonController
+                # 创建独立的日志记录器
                 self.controller = ButtonController()
                 logging.info("硬件控制器初始化成功")
-            except ImportError:
+            except ImportError as e:
                 self.use_hardware = False
                 self.current_mode = "软件模式（硬件不可用）"
-                logging.warning("硬件模块加载失败")
+                self.root.title(f"高级按键模拟器 v3.4 - {self.current_mode}")
+                logging.error(f"硬件模块加载失败: {str(e)}")
+                
+                # 显示错误通知
+                messagebox.showerror("硬件加载失败", 
+                                    f"无法加载硬件控制模块:\n{str(e)}\n\n"
+                                    "已自动切换到软件模式。")
+            except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
+                self.use_hardware = False
+                self.current_mode = "软件模式（硬件异常）"
+                self.root.title(f"高级按键模拟器 v3.4 - {self.current_mode}")
+                logging.error(f"硬件控制器初始化异常: {str(e)}\n{error_details}")
+                
+                # 显示详细的错误信息
+                messagebox.showerror(
+                    "硬件初始化失败",
+                    f"硬件控制器初始化失败:\n\n{str(e)}\n\n"
+                    f"详细信息:\n{error_details}"
+                )
 
     def _create_ui(self):
         """动态生成界面组件"""
@@ -181,7 +277,7 @@ class DynamicKeySimulator:
     def _control_hardware(self, btn_id, is_press):
         """硬件控制接口 - 添加更多错误处理"""
         try:
-            if not self.use_hardware:
+            if not self.use_hardware or not hasattr(self, 'controller'):
                 return
 
             config = self.key_bindings.get(btn_id, None)
@@ -212,15 +308,21 @@ class DynamicKeySimulator:
     def load_config(self):
         """加载配置文件"""
         try:
-            with open("key_bindings.json", 'r') as f:
-                config = json.load(f)
-                return {item['id']: item for item in config.get('mappings', [])}
+            config_path = "key_bindings.json"
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    return {item['id']: item for item in config.get('mappings', [])}
+            else:
+                logging.warning("配置文件不存在，使用默认配置")
         except Exception as e:
             logging.error(f"配置加载失败: {str(e)}")
-            return {
-                "btn1": {"id": "btn1", "key": "a", "color": "red", "btn_number": 0 },
-                "btn2": {"id": "btn2", "key": "b", "color": "orange", "btn_number": 1}
-            }
+        
+        # 默认配置
+        return {
+            "btn1": {"id": "btn1", "key": "a", "color": "red", "btn_number": 0 },
+            "btn2": {"id": "btn2", "key": "b", "color": "orange", "btn_number": 1}
+        }
 
     def _update_binding(self, btn_id):
         """更新按键绑定"""
@@ -230,7 +332,7 @@ class DynamicKeySimulator:
 
         new_key = self.entries[btn_id].get().strip().lower()
         # 新增冲突检测
-        existing = [k for k,v in self.key_bindings.items() if v['key'] == new_key]
+        existing = [k for k,v in self.key_bindings.items() if v['key'] == new_key and k != btn_id]
         if existing:
             logging.error(f"按键 {new_key} 已被 {existing[0]} 占用")
             return
@@ -245,45 +347,66 @@ class DynamicKeySimulator:
     def _save_config(self):
         """保存配置文件"""
         config = {"mappings": list(self.key_bindings.values())}
-        with open("key_bindings.json", 'w') as f:
+        config_path = "key_bindings.json"
+        with open(config_path, 'w') as f:
             json.dump(config, f, indent=4)
 
     def _setup_logging(self):
         """配置日志系统"""
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(message)s",
-            handlers=[
-                self.LogWindowHandler(self.log_area),
-                logging.FileHandler("./output/key_events.log")
-            ]
-        )
+        # 首先清除任何已有的日志处理器
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        
+        # 配置日志格式
+        formatter = logging.Formatter("%(asctime)s - %(message)s")
+        
+        # 文件处理器
+        log_dir = "output"
+        os.makedirs(log_dir, exist_ok=True)
+        file_handler = logging.FileHandler(os.path.join(log_dir, "key_events.log"))
+        file_handler.setFormatter(formatter)
+        
+        # 将UI日志处理器添加到根日志记录器
+        self.log_window_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(self.log_window_handler)
+        logging.getLogger().addHandler(file_handler)
+        logging.getLogger().setLevel(logging.INFO)
+        
         logging.info(f"启动成功 - 运行模式: {self.current_mode}")
 
     def _safe_shutdown(self):
         """安全关闭程序"""
         self.processing_flag.clear()
-        if self.listener.is_alive():
-            self.listener._suppress = True  # pynput特殊处理
+        
+        # 关闭日志处理器
+        if hasattr(self, 'log_window_handler'):
+            self.log_window_handler.close()
+        
+        # 停止键盘监听器
+        if hasattr(self, 'listener') and self.listener.is_alive():
+            self.listener._suppress = True
             self.listener.stop()
-        self.process_thread.join(timeout=1)
+        
+        # 停止事件处理线程
+        if hasattr(self, 'process_thread') and self.process_thread.is_alive():
+            self.process_thread.join(timeout=1)
+        
+        # 保存配置
         self._save_config()
+        
+        # 清理硬件资源
+        if hasattr(self, 'controller'):
+            try:
+                self.controller.cleanup()
+            except:
+                pass
+        
+        # 关闭窗口
         self.root.destroy()
-        if self.process_thread.is_alive():
+        
+        # 检查线程状态
+        if hasattr(self, 'process_thread') and self.process_thread.is_alive():
             logging.error("事件处理线程未正常退出")
-
-    class LogWindowHandler(logging.Handler):
-        """自定义日志显示器"""
-        def __init__(self, text_widget):
-            super().__init__()
-            self.text_widget = text_widget
-
-        def emit(self, record):
-            msg = self.format(record)
-            self.text_widget.configure(state="normal")
-            self.text_widget.insert(tk.END, msg + "\n")
-            self.text_widget.see(tk.END)
-            self.text_widget.configure(state="disabled")
 
 if __name__ == "__main__":
     import argparse
@@ -291,7 +414,6 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser(description="嵌入式按键模拟器")
-    # parser.add_argument("--hardware", action="store_true", help="启用硬件模式")
     parser.add_argument("--mode", choices=["hardware", "software"], default="software",
                         help="运行模式: hardware(硬件仿真)或software(纯软件模拟), 默认是software")
     args = parser.parse_args()
