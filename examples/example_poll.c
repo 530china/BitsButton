@@ -37,7 +37,13 @@ button_obj_t btns[] =
 
 button_obj_combo_t btns_combo[] =
 {
-    BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_0, 1, &defaul_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}), 2, 1),
+    BITS_BUTTON_COMBO_INIT(
+        USER_BUTTON_COMBO_0,    // 组合键ID
+        1,                      // 有效电平
+        &defaul_param,          // 参数配置
+        ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}),   // 组合按键成员
+        2,                      // 组合键成员数量
+        1),                     // 抑制单键事件
 };
 
 // 3. 读取按键状态函数
