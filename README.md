@@ -4,18 +4,10 @@
 <a href="https://github.com/530china/BitsButton/blob/master/LICENSE" target="blank">
 <img src="https://img.shields.io/github/license/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator license" />
 </a>
-<a href="https://github.com/530china/BitsButton/stargazers" target="blank">
-<img src="https://img.shields.io/github/stars/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator stars"/>
-</a>
-<a href="https://github.com/530china/BitsButton/issues" target="blank">
-<img src="https://img.shields.io/github/issues/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator issues"/>
-</a>
-<a href="https://github.com/530china/BitsButton/pulls" target="blank">
-<img src="https://img.shields.io/github/issues-pr/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator pull-requests"/>
-</a>
+<a href="https://deepwiki.com/530china/BitsButton"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
-<h2>👋 简介</h2>
+<h2>👋 一、简介</h2>
 ​​BitsButton是一款针对嵌入式系统优化的按键检测框架​​。通过创新的二进制位序列技术，它能高效处理单键、组合键（如Ctrl+C）和复杂按键序列（如单击→长按→双击），提供从按键按下到释放的全生命周期跟踪。独特的无锁环形缓冲设计确保多线程环境下事件不丢失，显著简化了传统按键逻辑的实现复杂度，特别适用于资源受限的嵌入式设备和复杂人机交互场景。
 
 
@@ -103,10 +95,23 @@ typedef struct {
 } bits_btn_result_t;
 ```
 
+| 字段                          | 用途说明                           | 位宽优化            |
+|-------------------------------|----------------------------------|--------------------|
+| `state_bits`                  | 按键序列历史状态位图               | 32位（可调整为64）支持32次按键事件 |
+| `long_press_period_trigger_cnt` | 长按周期触发计数                  | 支持最大65535次触发 |
+
 ## 📋 快速开始
 
+### 0）编译环境要求
+**⚠️ 编译器必须支持 C11 标准**
+
+#### 核心依赖的 C11 特性：
+- `_Atomic` 类型（内核无锁设计的核心）
+- `<stdatomic.h>` 原子操作库（内存序模型基础）
+- **匿名结构体**（简化核心数据结构设计）
+
 ### 1）基础使用
-<details>
+<details open>
 <summary>点击展开/折叠C代码<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
 
 - 首先将bits_button.c和bits_button.h包含进你的工程；
