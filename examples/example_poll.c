@@ -81,7 +81,11 @@ int my_log_printf(const char* format, ...) {
 int main()
 {
     // 5. 按键初始化；
-    bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, NULL, my_log_printf);
+    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, NULL, my_log_printf);
+    if(ret)
+    {
+        printf("bits button init failed, ret:%d \r\n", ret);
+    }
 
     //make the timer invoking the button_ticks() interval 5ms.
     //This function is implemented by yourself.
