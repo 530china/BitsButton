@@ -5,6 +5,14 @@
 #include "stdio.h"
 #include "stdbool.h"
 
+#ifndef BITS_BTN_BUFFER_SIZE
+#define BITS_BTN_BUFFER_SIZE        10
+#endif
+
+#ifndef BITS_BTN_MAX_COMBO_BUTTONS
+#define BITS_BTN_MAX_COMBO_BUTTONS  8 // 默认最大支持8个组合按钮
+#endif
+
 typedef uint32_t key_value_type_t;
 typedef uint32_t state_bits_type_t;
 typedef state_bits_type_t button_mask_type_t;
@@ -32,10 +40,6 @@ typedef enum {
 #define BITS_BTN_LONG_PRESS_START_TIME_MS    (1000)
 #define BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS (1000)
 #define BITS_BTN_TIME_WINDOW_TIME_MS         (300)
-
-#ifndef BITS_BTN_BUFFER_SIZE
-#define BITS_BTN_BUFFER_SIZE        10
-#endif
 
 #define BITS_BTN_NONE_PRESS_KV              0
 #define BITS_BTN_SINGLE_CLICK_KV            0b010
@@ -117,6 +121,8 @@ typedef struct bits_button
     uint32_t btn_tick;
     bits_btn_read_button_level _read_button_level;
     bits_btn_result_callback bits_btn_result_cb;
+
+    uint16_t combo_sorted_indices[BITS_BTN_MAX_COMBO_BUTTONS];
 } bits_button_t;
 
 /**

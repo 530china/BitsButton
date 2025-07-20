@@ -1,4 +1,3 @@
-
 #include "bits_button.h"
 #include "string.h"
 #include <stdatomic.h>
@@ -208,6 +207,62 @@ static bool bits_btn_read_buffer(bits_btn_result_t *result)
 }
 #endif
 
+/**
+  * @brief  Sort combo buttons during initialization (descending by key count)
+  * @param  button: Pointer to button object
+  * @retval None
+  */
+ static void sort_combo_buttons_in_init(bits_button_t *button)
+ {
+    const uint16_t cnt = button->btns_combo_cnt;  // Get number of combo buttons
+
+    // Skip sorting if no combo buttons or only one
+    if (cnt <= 1)
+    {
+        if (debug_printf && cnt == 0) debug_printf("No combo buttons\n");
+        return;
+    }
+
+    // Initialize index array (0,1,2,...)
+    for (uint16_t i = 0; i < cnt; i++)
+        button->combo_sorted_indices[i] = i;
+
+    // Insertion sort (descending by key count)
+    for (uint16_t i = 1; i < cnt; i++)
+    {
+        const uint16_t temp_idx = button->combo_sorted_indices[i];  // Current element to insert
+        const uint8_t temp_keys = button->btns_combo[temp_idx].key_count;  // Key count of current element
+        int16_t j = i - 1;  // Start from end of sorted portion
+
+        // Find insertion position: higher key count has higher priority
+        while (j >= 0 &&
+               button->btns_combo[button->combo_sorted_indices[j]].key_count < temp_keys)
+        {
+            // Shift lower priority elements backward
+            button->combo_sorted_indices[j + 1] = button->combo_sorted_indices[j];
+            j--;
+        }
+        // Insert current element at correct position
+        button->combo_sorted_indices[j + 1] = temp_idx;
+    }
+
+#if 0
+    // Debug output of sorting results
+    if (debug_printf)
+    {
+        debug_printf("Sorted combo indices (%d):\n", cnt);
+        for (uint16_t i = 0; i < cnt; i++)
+        {
+            const button_obj_combo_t* c = &button->btns_combo[button->combo_sorted_indices[i]];
+            debug_printf("  %d: ID=%d, Keys=", i, c->btn.key_id);
+            for (uint8_t j = 0; j < c->key_count; j++)
+                debug_printf("%d ", c->key_single_ids[j]);
+            debug_printf("\n");
+        }
+    }
+#endif
+}
+
 int32_t bits_button_init(button_obj_t* btns                                     , \
                          uint16_t btns_cnt                                      , \
                          button_obj_combo_t *btns_combo                         , \
@@ -236,6 +291,16 @@ int32_t bits_button_init(button_obj_t* btns                                     
     button->_read_button_level = read_button_level_func;
     button->bits_btn_result_cb = bits_btn_result_cb;
 
+    if (btns_combo_cnt > BITS_BTN_MAX_COMBO_BUTTONS)
+    {
+        if (debug_printf)
+        {
+            debug_printf("Error: Too many combo buttons (%d > max %d)\n",
+                         btns_combo_cnt, BITS_BTN_MAX_COMBO_BUTTONS);
+        }
+        return -3;
+    }
+
     for(uint16_t i = 0; i < btns_combo_cnt; i++)
     {
         button_obj_combo_t *combo = &button->btns_combo[i];
@@ -253,6 +318,9 @@ int32_t bits_button_init(button_obj_t* btns                                     
             combo->combo_mask |= ((button_mask_type_t)1UL << idx);
         }
     }
+
+    // Sort the combination buttons during initialization.
+    sort_combo_buttons_in_init(button);
 
 #ifdef BITS_BTN_BUFFER_SIZE
     bits_btn_init_buffer();
@@ -485,29 +553,6 @@ static inline POPCOUNT_TYPE_T __popcount(POPCOUNT_TYPE_T w)
 }
 
 /**
-  * @brief  Sort the button combo array by key count in descending order.
-  * @param  indices: Array to store the sorted indices.
-  * @param  combos: Array of button combo objects.
-  * @param  n: Number of button combo objects.
-  * @retval None
-  */
-static void sort_combo_buttons_by_key_count(uint16_t indices[], button_obj_combo_t* combos, uint16_t n)
-{
-    for (uint16_t i = 1; i < n; ++i)
-    {
-        uint16_t temp = indices[i];
-        int16_t j = i - 1;
-        // Sort in descending order by key_count
-        while (j >= 0 && combos[indices[j]].key_count < combos[temp].key_count)
-        {
-            indices[j + 1] = indices[j];
-            j--;
-        }
-        indices[j + 1] = temp;
-    }
-}
-
-/**
   * @brief  Dispatch and process combo buttons and generate a suppression mask.
   * @param  button: Pointer to the bits button object.
   * @param  suppression_mask: Pointer to store the suppression mask.
@@ -517,18 +562,10 @@ static void dispatch_combo_buttons(bits_button_t *button, button_mask_type_t *su
 {
     if(button->btns_combo_cnt == 0) return;
 
-    uint16_t sorted_indices[button->btns_combo_cnt];
-    for (uint16_t i = 0; i < button->btns_combo_cnt; ++i)
+    for (uint16_t i = 0; i < button->btns_combo_cnt; i++)
     {
-        sorted_indices[i] = i;
-    }
-
-    /* Sort in descending order by key_count */
-    sort_combo_buttons_by_key_count(sorted_indices, button->btns_combo, button->btns_combo_cnt);
-
-    for(uint16_t i = 0; i < button->btns_combo_cnt; i++)
-    {
-        button_obj_combo_t* combo = &button->btns_combo[sorted_indices[i]];
+        uint16_t combo_index = button->combo_sorted_indices[i];
+        button_obj_combo_t* combo = &button->btns_combo[combo_index];
         button_mask_type_t combo_mask = combo->combo_mask;
 
         // Handle state transitions for this combo button
@@ -550,7 +587,7 @@ static void dispatch_combo_buttons(bits_button_t *button, button_mask_type_t *su
   */
 static void dispatch_unsuppressed_buttons(bits_button_t *button, button_mask_type_t suppression_mask)
 {
-    // ​​Process Unsuppressed Individual Buttons​
+    // ​​Process Unsuppressed Individual Buttons
     for (size_t i = 0; i < button->btns_cnt; i++)
     {
         button_mask_type_t btn_mask = ((button_mask_type_t)1UL << i);
