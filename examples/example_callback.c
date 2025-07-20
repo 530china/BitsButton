@@ -137,7 +137,11 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
 int main()
 {
     // 6. 按键初始化；
-    bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, my_log_printf);
+    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, my_log_printf);
+    if(ret)
+    {
+        printf("bits button init failed, ret:%d \r\n", ret);
+    }
 
     //make the timer invoking the button_ticks() interval 5ms.
     //This function is implemented by yourself.
