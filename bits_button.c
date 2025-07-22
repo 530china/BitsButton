@@ -275,10 +275,11 @@ int32_t bits_button_init(button_obj_t* btns                                     
     bits_button_t *button = &bits_btn_entity;
     debug_printf = bis_btn_debug_printf;
 
-    if (btns == NULL|| read_button_level_func == NULL)
+    if (btns == NULL|| read_button_level_func == NULL ||
+        (btns_combo_cnt > 0 && btns_combo == NULL))
     {
         if(debug_printf)
-            debug_printf("Error, bits button init failed !\n");
+            debug_printf("Invalid init parameters !\n");
         return -2;
     }
 
@@ -562,19 +563,33 @@ static void dispatch_combo_buttons(bits_button_t *button, button_mask_type_t *su
 {
     if(button->btns_combo_cnt == 0) return;
 
+    button_mask_type_t activated_mask = 0;
+
     for (uint16_t i = 0; i < button->btns_combo_cnt; i++)
     {
         uint16_t combo_index = button->combo_sorted_indices[i];
         button_obj_combo_t* combo = &button->btns_combo[combo_index];
         button_mask_type_t combo_mask = combo->combo_mask;
 
+        // Check if the current combo button is covered by a more specific combo button
+        if (activated_mask & combo_mask)
+        {
+            // Already covered, skip processing
+            continue;
+        }
+
         // Handle state transitions for this combo button
         handle_button_state(&combo->btn, button->current_mask, combo_mask);
 
-        if (((button->current_mask & combo_mask) == combo_mask || combo->btn.state_bits)
-        && combo->suppress)
+        if ((button->current_mask & combo_mask) == combo_mask || combo->btn.state_bits)
         {
-            *suppression_mask |= combo_mask;
+            // Mark the current combo button as activated
+            activated_mask |= combo_mask;
+
+            if (combo->suppress)
+            {
+                *suppression_mask |= combo_mask;
+            }
         }
     }
 }
