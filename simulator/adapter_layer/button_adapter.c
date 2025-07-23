@@ -1,6 +1,7 @@
 #include "button_adapter.h"
 #include <stdarg.h>
 #include "stdio.h"
+#define BITS_BTN_DEBOUNCE_TIME_MS 60
 #include "../../bits_button.h"
 #define MAX_BUTTONS 10
 
@@ -64,9 +65,64 @@ button_obj_combo_t btns_combo[] =
     BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_1, 1, &defaul_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1, USER_BUTTON_3}), 3, 1),
 };
 
+void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
+{
+    printf("id:%d, event:%d, key_value:%d, long press period trigger cnt:%d \r\n", result.key_id, result.event, result.key_value, result.long_press_period_trigger_cnt);
+
+    if(result.event == BTN_STATE_PRESSED)
+    {
+        printf("id:%d pressed \n", result.key_id);
+    }
+
+    if(result.event == BTN_STATE_RELEASE)
+    {
+        printf("id:%d release\n", result.key_id);
+    }
+
+    if(result.event == BTN_STATE_LONG_PRESS)
+    {
+        if(result.key_value == 0b11)
+            printf("id:%d, long press start\n", result.key_id);
+        else if(result.key_value == 0b111)
+        {
+            printf("id:%d, long press hold, cnt:%d\n", result.key_id, result.long_press_period_trigger_cnt);
+        }
+        else if(result.key_value == 0b1011)
+            printf("id:%d, single click and long press start\n", result.key_id);
+        else if(result.key_value == 0b101011)
+            printf("id:%d, double click and long press start\n", result.key_id);
+    }
+
+    if(result.event == BTN_STATE_FINISH)
+    {
+        switch(result.key_value)
+        {
+        case BITS_BTN_SINGLE_CLICK_KV:
+            printf("id:%d single click\n", result.key_id);
+            break;
+        case BITS_BTN_DOUBLE_CLICK_KV:
+            printf("id:%d double click\n", result.key_id);
+            break;
+        case 0b10111010:
+            printf("id:%d single click and long press then single click\n", result.key_id);
+            break;
+        }
+    }
+
+    // 通用的长按保持处理（不同的方式判别长按保持）
+    if(result.event == BTN_STATE_LONG_PRESS && result.long_press_period_trigger_cnt > 0)
+    {
+        printf("[%d] long press hold, period:%d\r\n",
+               result.key_id,
+               result.long_press_period_trigger_cnt);
+        // 长按保持处理（如连续调节音量）
+    }
+}
+
 // 初始化适配器
 __attribute__((constructor)) static void init_adapter() {
-    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, NULL, my_log_printf);
+    // int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, my_log_printf);
+    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, NULL);
     if(ret)
     {
         printf("bits button init failed, ret:%d \r\n", ret);
