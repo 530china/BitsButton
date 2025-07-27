@@ -106,7 +106,7 @@ size_t get_bits_btn_buffer_count(void)
   * @brief  Clear the ring buffer. Note that additional synchronization is required in a multi-threaded environment.
   * @retval None
   */
-static void bits_btn_clear_buffer(void)
+void bits_btn_clear_buffer(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -124,7 +124,7 @@ size_t get_bits_btn_overwrite_count(void)
   * @param  result: Pointer to the button result to be written.
   * @retval true if written successfully, false if the buffer is full.
   */
-static bool bits_btn_write_buffer(bits_btn_result_t *result)
+bool bits_btn_write_buffer(bits_btn_result_t *result)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 

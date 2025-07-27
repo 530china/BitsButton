@@ -11,6 +11,18 @@
 ​​BitsButton是一款针对嵌入式系统优化的按键检测框架​​。通过创新的二进制位序列技术，它能高效处理单键、组合键（如Ctrl+C）和复杂按键序列（如单击→长按→双击），提供从按键按下到释放的全生命周期跟踪。独特的无锁环形缓冲设计确保多线程环境下事件不丢失，显著简化了传统按键逻辑的实现复杂度，特别适用于资源受限的嵌入式设备和复杂人机交互场景。
 
 
+## 📁 工程结构
+
+```
+BitsButton/
+├── bits_button.h/.c        # 🎯 核心按键处理库
+├── test/                   # 🧪 完整测试框架
+├── examples/               # 📚 示例代码
+├── docs/                   # 📖 文档资源
+├── run_tests.bat           # 🚀 快速测试脚本
+└── README.md               # 本文档
+```
+
 ## 🌱 特性
 
 >💡**1.按键事件回溯支持，创新使用位序列记录按键状态，1代表按下，0代表松开**
@@ -110,7 +122,33 @@ typedef struct {
 - `<stdatomic.h>` 原子操作库（内存序模型基础）
 - **匿名结构体**（简化核心数据结构设计）
 
-### 1）基础使用
+### 1）运行测试框架
+```bash
+# 🚀 快速运行所有测试（Windows）
+.\run_tests.bat
+
+# 或者进入test目录运行
+cd test
+.\scripts\run_tests.bat
+
+# Linux/macOS环境
+cd test
+./scripts/run_tests.sh
+
+# 使用CMake构建
+mkdir build && cd build
+cmake .. && make
+./test_main_new
+```
+
+**测试框架特色：**
+- ✅ **自研轻量级框架** - 专为嵌入式C项目设计，无外部依赖
+- ✅ **分层模块化架构** - core/utils/cases/config四层设计，易于扩展
+- ✅ **全面测试覆盖** - 基础功能、组合按键、边界条件、性能测试
+- ✅ **跨平台支持** - Windows批处理和Linux/macOS shell脚本
+- ✅ **硬件模拟** - 完整的按键状态和时间模拟工具
+
+### 2）基础使用
 <details open>
 <summary>点击展开/折叠C代码<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
 
@@ -119,7 +157,7 @@ typedef struct {
 - [使用poll方式](examples/example_poll.c);
 <br></details>
 
-### 2）进阶调试
+### 3）进阶调试
 
 <details>
 <summary>点击展开/折叠<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
@@ -146,21 +184,75 @@ bits_button_init(
 ```
 <br></details>
 
-### 3）按键模拟器
+### 4）测试框架体验
+```bash
+# 🎯 快速体验测试框架
+.\run_tests.bat
+
+# 📋 查看详细测试文档
+cd test
+type README.md  # Windows
+cat README.md   # Linux/macOS
+
+# 🔧 添加自定义测试
+# 1. 在 test/cases/ 相应目录创建测试文件
+# 2. 在 test_main_new.c 中注册测试函数
+# 3. 运行测试验证功能
+```
+
+### 5）按键模拟器
 - 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证程序的逻辑，详情见：[按键模拟器](examples/ButtonSimulator.md)
 
 ## ⚡ 其他
 - 本项目基于本人实际开发中遇到的一些按键驱动使用体验问题，在他人项目（见参考链接）的思想基础上，开发的此按键检测框架，感谢帮助思考我的小伙伴[shawnfeng0](https://github.com/shawnfeng0)以及正在使用此模块的小伙伴，欢迎一起开发改进！
 
+## 🧪 测试框架亮点
+
+BitsButton 配备了完整的**自研测试框架**，专为嵌入式C项目设计：
+
+### 🏗️ 分层架构设计
+- **核心层(core/)**: 测试框架基础设施和运行器
+- **工具层(utils/)**: 模拟工具、时间控制、断言增强
+- **测试层(cases/)**: 按功能分类的测试用例
+- **配置层(config/)**: 统一的测试参数管理
+
+### 📊 测试覆盖全面
+测试类型 | 覆盖内容 | 测试数量
+--- | --- | ---
+**基础功能** | 单击、双击、长按、连击 | 5+ 测试
+**组合按键** | 多键组合、组合长按 | 4+ 测试  
+**边界条件** | 超时、消抖、极限情况 | 6+ 测试
+**性能测试** | 高频按键、并发处理 | 5+ 测试
+
+### 🛠️ 开发友好
+```bash
+# 一键运行所有测试
+.\run_tests.bat
+
+# 测试结果示例
+========================================
+     BitsButton 测试框架 v3.0
+========================================
+✓ test_single_click_event:PASS
+✓ test_double_click_event:PASS  
+✓ test_combo_button_basic:PASS
+✓ test_high_frequency_presses:PASS
+========================================
+9 Tests 0 Failures 0 Ignored - OK
+========================================
+```
+
 ## 🤝 参与开发
 欢迎贡献代码！当前路线图
-- [x] 基础按键检测功能；
-- [x] 组合按键支持；
-- [x] 按键结果高性能缓冲区支持；
-- [x] 按键模拟器Window环境支持；
-- [x] 按键模拟器Linux/macOS环境支持；
-- [ ] 自动化测试框架支持；
+- [x] 基础按键检测功能
+- [x] 组合按键支持
+- [x] 按键结果高性能缓冲区支持
+- [x] 按键模拟器Window环境支持
+- [x] 按键模拟器Linux/macOS环境支持
+- [x] **自动化测试框架支持** ✨ **已完成完整测试框架！**
 - [ ] 更多应用示例
+- [ ] CI/CD集成支持
+- [ ] 测试覆盖率统计
 
 ## 💬 参考链接
 - [MultiButton](https://github.com/0x1abin/MultiButton)
