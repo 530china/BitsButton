@@ -3,6 +3,30 @@
 ## 简介
 BitsButton 按键模拟器是一个跨平台的按键模拟工具，支持硬件和软件两种模式。该工具提供了直观的图形界面，允许用户配置按键绑定、监控按键状态并记录操作日志
 
+## 目录结构
+
+```
+simulator/
+├── adapter_layer/           # C语言适配层
+│   ├── button_adapter.c     # 适配层实现（连接C库和Python模拟器）
+│   ├── button_adapter.h     # 适配层接口定义
+│   ├── button_types.h       # 按键类型定义
+│   └── Makefile             # 编译配置
+├── python_simulator/        # Python实现的模拟器
+│   ├── advanced_v2_sim.py   # 高级模拟器实现
+│   ├── button_ctrl.py       # 按键控制逻辑
+│   ├── button_ui.py         # 用户界面实现
+│   ├── event_logger.py      # 事件日志记录
+│   └── config_manager.py    # 配置管理
+├── key_bindings.json        # 按键绑定配置文件
+├── run.py                   # 主运行脚本
+├── output/                  # 编译输出目录
+│   ├── libbutton.dll        # Windows动态库
+│   ├── libbutton.so         # Linux动态库
+│   └── libbutton.dylib      # macOS动态库
+└── ButtonSimulator.md       # 本文档
+```
+
 ## 主要特性
 
 - ​跨平台支持​​：Windows,Linux 和 macOS

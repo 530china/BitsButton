@@ -19,6 +19,7 @@ BitsButton/
 ├── test/                   # 🧪 完整测试框架
 ├── examples/               # 📚 示例代码
 ├── docs/                   # 📖 文档资源
+├── simulator/              # 🎮 按键模拟器
 ├── run_tests.bat           # 🚀 快速测试脚本
 └── README.md               # 本文档
 ```
@@ -159,7 +160,7 @@ bits_button_init(
 <br></details>
 
 ## 六、按键模拟器
-- 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证程序的逻辑，详情见：[按键模拟器](examples/ButtonSimulator.md)
+- 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证程序的逻辑，详情见：[按键模拟器](simulator/ButtonSimulator.md)
 
 ## 七、测试框架亮点🧪
 
