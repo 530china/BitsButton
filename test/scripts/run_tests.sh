@@ -1,95 +1,68 @@
 #!/bin/bash
 
-# 设置UTF-8编码
-export LANG=zh_CN.UTF-8
+# BitsButton 测试运行脚本 (Linux/macOS)
+# 支持 GitHub Actions CI 环境
 
-# 获取脚本所在目录的绝对路径
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# 获取test目录路径（脚本目录的上级目录）
-TEST_DIR="$(dirname "$SCRIPT_DIR")"
-# 保存当前目录
-ORIGINAL_DIR="$(pwd)"
+set -e  # 遇到错误立即退出
 
-echo "========================================"
-echo "     BitsButton 测试框架 v3.0"
-echo "     分层架构 - 模块化设计"
-echo "========================================"
-echo
+echo "========================================="
+echo "    BitsButton 测试框架 - CI 模式"
+echo "========================================="
 
-# 设置测试目标
-TEST_TARGET="run_tests_new"
-TEST_DESCRIPTION="分层架构测试"
+# 检测运行环境
+if [ -n "$GITHUB_ACTIONS" ]; then
+    echo "🚀 检测到 GitHub Actions 环境"
+    CI_MODE=true
+else
+    echo "🏠 本地开发环境"
+    CI_MODE=false
+fi
 
-echo "运行模式: $TEST_DESCRIPTION"
-echo "测试目录: $TEST_DIR"
-echo
+# 设置构建目录
+BUILD_DIR="build"
+TEST_LOG="test_output.log"
 
-# 切换到test目录
-cd "$TEST_DIR"
+# 清理之前的构建
+if [ -d "$BUILD_DIR" ]; then
+    echo "🧹 清理之前的构建..."
+    rm -rf "$BUILD_DIR"
+fi
 
 # 创建构建目录
-if [ ! -d "build" ]; then
-    echo "创建构建目录..."
-    mkdir build
-fi
-cd build
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 
-# 清除CMake缓存（可选）
-if [ "$1" = "clean" ]; then
-    echo "清理构建缓存..."
-    rm -f CMakeCache.txt
-    rm -rf CMakeFiles
-fi
-
-# 配置CMake项目
-echo "配置CMake项目..."
-cmake -DCMAKE_C_STANDARD=11 ..
-if [ $? -ne 0 ]; then
-    echo "CMake配置失败！"
-    echo "当前目录: $(pwd)"
-    echo "查找CMakeLists.txt:"
-    if [ -f "../CMakeLists.txt" ]; then
-        echo "  ✓ 找到 ../CMakeLists.txt"
-    else
-        echo "  ✗ 未找到 ../CMakeLists.txt"
-    fi
-    cd "$ORIGINAL_DIR"
-    exit 1
-fi
-
-# 编译项目
-echo
-echo "编译测试程序..."
-cmake --build . --target $TEST_TARGET
-if [ $? -ne 0 ]; then
-    echo "编译失败！"
-    cd "$ORIGINAL_DIR"
-    exit 1
-fi
-
-# 运行测试
-echo
-echo "运行测试..."
-echo "========================================"
-./$TEST_TARGET
-test_result=$?
-
-echo
-echo "========================================"
-if [ $test_result -eq 0 ]; then
-    echo "所有测试通过！ ✓"
+echo "🔧 配置 CMake..."
+if [ "$CI_MODE" = true ]; then
+    # CI 环境配置
+    cmake -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER="${CC:-gcc}" \
+          -DCMAKE_VERBOSE_MAKEFILE=ON \
+          ..
 else
-    echo "测试失败！ ✗"
+    # 本地环境配置
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
 fi
-echo "========================================"
 
-# 显示使用帮助
-echo
-echo "使用方法:"
-echo "  ./run_tests.sh       - 运行分层架构测试"
-echo "  ./run_tests.sh clean - 清理后重新构建"
+echo "🔨 编译测试程序..."
+make -j$(nproc 2>/dev/null || echo 4)
 
-# 返回原始目录
-cd "$ORIGINAL_DIR"
+echo "🧪 运行测试..."
+if [ "$CI_MODE" = true ]; then
+    # CI 环境：输出到文件和控制台
+    ./run_tests_new 2>&1 | tee "../$TEST_LOG"
+    TEST_RESULT=${PIPESTATUS[0]}
+else
+    # 本地环境：直接运行
+    ./run_tests_new
+    TEST_RESULT=$?
+fi
 
-exit $test_result
+echo "========================================="
+if [ $TEST_RESULT -eq 0 ]; then
+    echo "✅ 所有测试通过！"
+    exit 0
+else
+    echo "❌ 测试失败！退出码: $TEST_RESULT"
+    exit $TEST_RESULT
+fi

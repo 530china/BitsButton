@@ -112,8 +112,8 @@ void test_boundary_values(void) {
                               test_framework_log_printf);
     TEST_ASSERT_EQUAL(0, result);  // 应该能成功初始化
     
-    // 测试基本功能是否正常
-    mock_button_click(65535, 100);
+    // 测试基本功能是否正常（使用合理的按键ID避免溢出）
+    mock_button_click(255, 100);  // 使用uint8_t范围内的值
     time_simulate_time_window_end();
     
     // 由于时间窗口极长，可能需要特殊处理

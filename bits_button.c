@@ -357,7 +357,7 @@ static void __append_bit(state_bits_type_t* state_bits, uint8_t bit)
   * @param  target_bits_number: target bits number
   * @retval 1 if it matches, 0 otherwise.
   */
-static uint8_t __check_if_the_bits_match(key_value_type_t *state_bits, key_value_type_t target, uint8_t target_bits_number)
+static uint8_t __check_if_the_bits_match(const key_value_type_t *state_bits, key_value_type_t target, uint8_t target_bits_number)
 {
     key_value_type_t mask = (1 << target_bits_number) - 1;
 

@@ -1,0 +1,41 @@
+# cppcheck 抑制配置文件
+# 用于忽略一些在测试和嵌入式代码中常见但无害的警告
+
+# 系统头文件相关
+missingIncludeSystem
+
+# 未使用的函数（测试代码中常见）
+unusedFunction
+
+# 未使用的变量（测试代码中常见）
+unusedVariable
+
+# 参数可以声明为const指针（风格问题，不影响功能）
+constParameterPointer
+
+# 模1运算总是等于0（当BUFFER_SIZE为1时的特殊情况）
+moduloofone
+
+# 未匹配的抑制（当某些抑制规则不适用时）
+unmatchedSuppression
+
+# 函数参数未使用（测试代码中常见）
+unusedParameter
+
+# 变量作用域可以缩小（风格问题）
+variableScope
+
+# 条件总是true/false（测试代码中的断言）
+knownConditionTrueFalse
+
+# 符号比较（测试代码中常见）
+signConversion
+
+# 缺少头文件（系统环境差异）
+missingInclude
+
+# 重复的条件赋值（风格问题）
+duplicateConditionalAssign
+
+# 变量可以声明为const指针（风格问题）
+constVariablePointer

@@ -5,6 +5,9 @@ project(BitsButtonTests)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# 包含编译器配置
+include(cmake/CompilerFlags.cmake)
+
 # 添加头文件路径
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../
