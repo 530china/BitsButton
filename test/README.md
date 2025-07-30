@@ -55,13 +55,16 @@ test/
 - **模拟工具**: 硬件和系统调用模拟
 - **时间工具**: 时间相关的测试辅助函数
 
-### 📊 测试类型覆盖
-测试类型 | 覆盖内容 | 文件数量 | 测试数量
---- | --- | --- | ---
-**基础功能** | 单击、双击、长按、连击 | 3个文件 | 15+ 测试
-**组合按键** | 多键组合、组合长按 | 2个文件 | 8+ 测试  
-**边界条件** | 超时、消抖、极限情况 | 3个文件 | 12+ 测试
-**性能测试** | 高频按键、并发处理 | 1个文件 | 5+ 测试
+### 📊 测试覆盖统计（实际运行数据）
+测试类型 | 覆盖内容 | 测试数量
+--- | --- | ---
+**基础功能** | 单击、双击、长按、连击 | 5个测试
+**组合按键** | 基本组合、高级组合、冲突处理 | 4个测试  
+**边界条件** | 超时、消抖、状态转换、时间窗口 | 8个测试
+**错误处理** | 空指针、无效参数、资源耗尽 | 4个测试
+**初始化配置** | 成功初始化、激活电平、自定义参数 | 5个测试
+**缓冲区操作** | 溢出保护、状态跟踪、边界情况 | 3个测试
+**总计** | **全面的功能覆盖** | **29个测试**
 
 ### 🚀 CI/CD 集成
 - **多平台支持**: Ubuntu, Windows, macOS 自动测试
@@ -74,8 +77,7 @@ test/
 ### 快速开始
 ```bash
 # 项目根目录一键测试
-./run_tests.bat     # Windows
-./run_tests.sh      # Linux/macOS
+./run_tests.bat     # Windows（项目根目录）
 ```
 
 ### Windows 环境
@@ -97,14 +99,11 @@ mingw32-make
 
 ### Linux/Mac 环境
 ```bash
-# 方法1: 使用项目根目录脚本
-./run_tests.sh
-
-# 方法2: 进入 test 目录
+# 方法1: 进入 test 目录
 cd test
 ./scripts/run_tests.sh
 
-# 方法3: 使用 CMake
+# 方法2: 使用 CMake
 cd test
 mkdir build && cd build
 cmake ..
@@ -116,27 +115,42 @@ make -j$(nproc)
 ```
 ========================================
      BitsButton 测试框架 v3.0
+     分层架构 - 模块化设计
 ========================================
-[INFO] 开始运行测试...
-[INFO] 发现 40 个测试用例
 
-✓ test_single_click_event: PASS (2ms)
-✓ test_double_click_event: PASS (3ms)  
-✓ test_long_press_basic: PASS (15ms)
-✓ test_combo_button_basic: PASS (5ms)
-✓ test_high_frequency_presses: PASS (8ms)
-✓ test_buffer_overflow_handling: PASS (4ms)
+【单按键基础功能测试】
+✓ test_single_click_event: PASS
+✓ test_double_click_event: PASS  
+✓ test_triple_click_event: PASS
+✓ test_long_press_event: PASS
+✓ test_long_press_hold_event: PASS
+
+【组合按键功能测试】
+✓ test_basic_combo_button: PASS
+
+【边界条件测试】
+✓ test_slow_double_click_timeout: PASS
+✓ test_debounce_functionality: PASS
+
+【性能压力测试】
+✓ test_high_frequency_button_presses: PASS
+
+【缓冲区操作测试】
+✓ test_buffer_overflow_protection: PASS
+✓ test_buffer_state_tracking: PASS
+✓ test_buffer_edge_cases: PASS
+
 ...
 
 ========================================
-测试结果汇总:
-- 总测试数: 40
-- 通过: 40
-- 失败: 0
-- 忽略: 0
-- 总耗时: 156ms
+           测试完成
 ========================================
-🎉 所有测试通过！
+-----------------------
+29 Tests 0 Failures 0 Ignored
+OK
+========================================
+✅ 所有测试通过！
+========================================
 ```
 
 ## 🔧 开发指南
@@ -151,42 +165,58 @@ make -j$(nproc)
 
 2. **创建测试文件**：
    ```c
-   #include "../core/test_framework.h"
-   #include "../utils/assert_utils.h"
-   #include "../utils/mock_utils.h"
-   #include "../../bits_button.h"
+   /* test_my_feature.c - 我的功能测试 */
+   #include "unity.h"
+   #include "core/test_framework.h"
+   #include "utils/mock_utils.h"
+   #include "utils/time_utils.h"
+   #include "utils/assert_utils.h"
+   #include "config/test_config.h"
+   #include "bits_button.h"
    
-   void test_my_new_feature() {
-       // 设置测试环境
-       setup_mock_hardware();
+   void test_my_new_feature(void) {
+       printf("\n=== 测试我的新功能 ===\n");
        
-       // 执行测试
-       int result = my_function();
+       // 设置测试环境
+       test_framework_reset();
+       mock_reset_all_buttons();
+       
+       // 创建按键对象
+       static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
+       button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
+       bits_button_init(&button, 1, NULL, 0, 
+                        test_framework_mock_read_button, 
+                        test_framework_event_callback, 
+                        test_framework_log_printf);
+       
+       // 执行测试逻辑
+       mock_button_click(1, STANDARD_CLICK_TIME_MS);
        
        // 验证结果
-       ASSERT_EQ(EXPECTED_VALUE, result);
-       ASSERT_TRUE(condition);
-       
-       // 清理
-       cleanup_mock_hardware();
-   }
-   
-   void register_my_tests() {
-       REGISTER_TEST(test_my_new_feature);
+       ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, EXPECTED_VALUE);
+       printf("我的新功能测试通过\n");
    }
    ```
 
 3. **在主程序中注册**：
    在 `test_main_new.c` 中添加：
    ```c
-   extern void register_my_tests();
+   // 在外部函数声明区域添加
+   extern void test_my_new_feature(void);
    
-   int main() {
-       // ... 其他注册
-       register_my_tests();
-       // ...
+   // 在 main() 函数的相应测试组中添加
+   int main(void) {
+       // ... 其他代码
+       
+       printf("\n【我的功能测试】\n");
+       RUN_TEST(test_my_new_feature);
+       
+       // ... 其他代码
    }
    ```
+
+4. **更新CMakeLists.txt**：
+   在 `test/CMakeLists.txt` 中将新的测试文件添加到源文件列表中。
 
 ### 测试最佳实践
 
@@ -343,7 +373,7 @@ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
 ## 🎉 总结
 
 BitsButton 测试框架提供了：
-- ✅ **完整的测试覆盖** - 从基础功能到性能测试
+- ✅ **完整的测试覆盖** - 29个测试用例覆盖所有核心功能
 - ✅ **多平台支持** - Windows, Linux, macOS 全覆盖
 - ✅ **CI/CD 集成** - 自动化质量保证
 - ✅ **开发友好** - 简单易用的测试 API
