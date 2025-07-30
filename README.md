@@ -1,6 +1,9 @@
 <h1 align="center">BitsButton</h1>
 
 <p align="center">
+<a href="https://github.com/530china/BitsButton/actions/workflows/stable-ci.yml">
+<img src="https://github.com/530china/BitsButton/workflows/BitsButton%20稳定CI/badge.svg" alt="CI Status" />
+</a>
 <a href="https://github.com/530china/BitsButton/blob/master/LICENSE" target="blank">
 <img src="https://img.shields.io/github/license/rahuldkjain/github-profile-readme-generator?style=flat-square" alt="github-profile-readme-generator license" />
 </a>
@@ -9,7 +12,6 @@
 
 <h2> 一、简介👋</h2>
 ​​BitsButton是一款针对嵌入式系统优化的按键检测框架​​。通过创新的二进制位序列技术，它能高效处理单键、组合键（如Ctrl+C）和复杂按键序列（如单击→长按→双击），提供从按键按下到释放的全生命周期跟踪。独特的无锁环形缓冲设计确保多线程环境下事件不丢失，显著简化了传统按键逻辑的实现复杂度，特别适用于资源受限的嵌入式设备和复杂人机交互场景。
-
 
 ## 二、工程结构 
 
@@ -20,6 +22,8 @@ BitsButton/
 ├── examples/               # 📚 示例代码
 ├── docs/                   # 📖 文档资源
 ├── simulator/              # 🎮 按键模拟器
+├── .github/workflows/      # 🚀 CI/CD 自动化
+│   └── stable-ci.yml       # 稳定的多平台测试配置
 ├── run_tests.bat           # 🚀 快速测试脚本
 └── README.md               # 本文档
 ```
@@ -123,7 +127,34 @@ typedef struct {
 - `<stdatomic.h>` 原子操作库（内存序模型基础）
 - **匿名结构体**（简化核心数据结构设计）
 
-### 1）基础使用
+### 1）快速测试
+
+```bash
+# 克隆项目
+git clone https://github.com/530china/BitsButton.git
+cd BitsButton
+
+# 运行测试
+./run_tests.bat  # Windows
+
+# 或者使用CMake构建
+cd test
+mkdir build && cd build
+cmake ..
+make
+./run_tests_new
+```
+
+### 2）集成到你的项目
+
+1. 将 `bits_button.c` 和 `bits_button.h` 复制到你的项目中
+2. 在你的代码中包含头文件：
+   ```c
+   #include "bits_button.h"
+   ```
+3. 开始使用！
+
+### 3）基础使用示例
 <details open>
 <summary>点击展开/折叠C代码<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
 
@@ -132,7 +163,7 @@ typedef struct {
 - [使用poll方式](examples/example_poll.c);
 <br></details>
 
-### 2）进阶调试
+### 4）进阶调试
 
 <details>
 <summary>点击展开/折叠<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
@@ -159,10 +190,40 @@ bits_button_init(
 ```
 <br></details>
 
-## 六、按键模拟器
+## 六、CI/CD 自动化 🚀
+
+BitsButton 配备了完整的 **GitHub Actions CI/CD 流水线**：
+
+### 🏗️ 多平台支持
+平台 | 编译器 | 状态
+--- | --- | ---
+**Ubuntu** | GCC + Clang | ✅ 自动测试
+**Windows** | MinGW-GCC | ✅ 自动测试  
+**macOS** | Clang | ✅ 自动测试
+
+### 📊 质量保证
+- **自动化测试**: 每次提交自动运行完整测试套件
+- **代码质量检查**: 基础静态分析，确保代码质量
+- **多编译器验证**: 确保跨平台兼容性
+- **测试结果上传**: 失败时自动保存调试信息
+
+### 🛠️ CI配置文件
+```yaml
+# .github/workflows/stable-ci.yml
+name: BitsButton 稳定CI
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        compiler: [gcc, clang]
+```
+
+## 七、按键模拟器
 - 为了脱离开发板进行程序的逻辑验证，我用python编写了一个按键模拟器，可以直接在pc端验证程序的逻辑，详情见：[按键模拟器](simulator/ButtonSimulator.md)
 
-## 七、测试框架亮点🧪
+## 八、测试框架亮点🧪
 
 BitsButton 配备了完整的**自研测试框架**，专为嵌入式C项目设计：
 - 详情见：[测试框架](test/README.md)
@@ -210,9 +271,11 @@ BitsButton 配备了完整的**自研测试框架**，专为嵌入式C项目设�
 - [x] 按键模拟器Window环境支持
 - [x] 按键模拟器Linux/macOS环境支持
 - [x] **自动化测试框架支持** ✨ **已完成完整测试框架！**
+- [x] **CI/CD集成支持** ✨ **已完成稳定的多平台CI！**
 - [x] 更多应用示例
-- [ ] CI/CD集成支持
 - [ ] 测试覆盖率统计
+- [ ] 性能基准测试
+- [ ] 更多硬件平台适配
 
 ## 💬 参考链接
 - [MultiButton](https://github.com/0x1abin/MultiButton)

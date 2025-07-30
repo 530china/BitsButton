@@ -107,7 +107,7 @@ void test_custom_parameters(void) {
     time_simulate_pass(custom_param.time_window_time_ms + 50);
     
     // 检查是否有事件产生
-    bits_btn_result_t* events = test_framework_get_events();
+    // bits_btn_result_t* events = test_framework_get_events();  // 暂时注释掉未使用的变量
     int event_count = test_framework_get_event_count();
     
     if (event_count == 0) {
