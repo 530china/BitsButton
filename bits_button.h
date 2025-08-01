@@ -148,6 +148,7 @@ typedef struct bits_button
   *         - -1: Invalid key ID in combination button configuration. A key ID specified in a
   *               combination button configuration does not exist in the single button array.
   *         - -2: Invalid input parameters. Returned if either `btns` or `read_button_level_func` is NULL.
+  *         - -3: Too many combo buttons. The number of combo buttons exceeds the maximum allowed.
   */
 int32_t bits_button_init(button_obj_t* btns                                     , \
                          uint16_t btns_cnt                                      , \
@@ -170,6 +171,14 @@ void bits_button_ticks(void);
   * @retval true if read successfully, false if the buffer is empty.
   */
 bool bits_button_get_key_result(bits_btn_result_t *result);
+
+/**
+  * @brief  Reset all button states to idle. 
+  *         This function should be called when resuming from low power mode
+  *         to clear any residual button states from before the pause.
+  * @retval None
+  */
+void bits_button_reset_states(void);
 
 /**
   * @brief  Get the number of buffer overwrites.
