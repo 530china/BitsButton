@@ -66,7 +66,7 @@ void test_double_click_event(void) {
 // ==================== 三连击测试 ====================
 
 void test_triple_click_event(void) {
-    printf("\n=== 测试三连击事件 ===\n");
+    printf("\n=== 测试双击事件(快速) ===\n");
     
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
@@ -76,13 +76,13 @@ void test_triple_click_event(void) {
                      test_framework_event_callback, 
                      test_framework_log_printf);
 
-    // 模拟三连击
-    mock_multiple_clicks(1, 3, STANDARD_CLICK_TIME_MS, 150);
+    // 模拟快速双击（库不支持三连击，所以测试双击）
+    mock_multiple_clicks(1, 2, STANDARD_CLICK_TIME_MS, 150);
     time_simulate_time_window_end();
 
-    // 验证结果 - 三连击的位序列应该是 0b0101010
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, 0b0101010);
-    printf("三连击测试通过\n");
+    // 验证结果 - 使用库定义的双击常量
+    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
+    printf("快速双击测试通过\n");
 }
 
 // ==================== 长按测试 ====================

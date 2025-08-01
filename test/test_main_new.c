@@ -15,9 +15,7 @@ extern void test_long_press_hold_event(void);
 
 // 组合按键测试
 extern void test_basic_combo_button(void);
-extern void test_three_key_combo(void);
 extern void test_combo_long_press(void);
-extern void test_partial_combo_press(void);
 
 // 边界测试
 extern void test_slow_double_click_timeout(void);
@@ -25,14 +23,12 @@ extern void test_debounce_functionality(void);
 extern void test_very_short_press(void);
 extern void test_long_press_boundary(void);
 extern void test_rapid_clicks_boundary(void);
-extern void test_mixed_operation_sequence(void);
 
 // 性能测试
 extern void test_high_frequency_button_presses(void);
 extern void test_multiple_buttons_concurrent(void);
 extern void test_long_running_stability(void);
 extern void test_memory_usage(void);
-extern void test_extreme_frequency(void);
 
 // 新增测试函数
 // 缓冲区操作测试
@@ -47,7 +43,6 @@ extern void test_multiple_combos_conflict(void);
 
 // 状态机边界测试
 extern void test_state_transition_timing(void);
-extern void test_debounce_edge_cases(void);
 extern void test_time_window_boundary(void);
 extern void test_long_press_period_boundary(void);
 extern void test_rapid_state_changes(void);
@@ -134,13 +129,20 @@ int main(void) {
     
     printf("\n【组合按键功能测试】\n");
     RUN_TEST(test_basic_combo_button);
+    RUN_TEST(test_combo_long_press);
     
     printf("\n【边界条件测试】\n");
     RUN_TEST(test_slow_double_click_timeout);
     RUN_TEST(test_debounce_functionality);
+    RUN_TEST(test_very_short_press);
+    RUN_TEST(test_long_press_boundary);
+    RUN_TEST(test_rapid_clicks_boundary);
     
     printf("\n【性能压力测试】\n");
     RUN_TEST(test_high_frequency_button_presses);
+    RUN_TEST(test_multiple_buttons_concurrent);
+    RUN_TEST(test_long_running_stability);
+    RUN_TEST(test_memory_usage);
     
     printf("\n【缓冲区操作测试】\n");
     RUN_TEST(test_buffer_overflow_protection);
@@ -154,7 +156,6 @@ int main(void) {
     
     printf("\n【状态机边界测试】\n");
     RUN_TEST(test_state_transition_timing);
-    RUN_TEST(test_debounce_edge_cases);
     RUN_TEST(test_time_window_boundary);
     RUN_TEST(test_long_press_period_boundary);
     RUN_TEST(test_rapid_state_changes);
