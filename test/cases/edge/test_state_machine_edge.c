@@ -50,33 +50,6 @@ void test_state_transition_timing(void) {
     printf("状态转换时序测试通过: 长按阈值边界正确\n");
 }
 
-void test_debounce_edge_cases(void) {
-    printf("\n=== 测试消抖边界情况 ===\n");
-    
-    // 创建按键对象
-    static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
-    button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
-
-    // 测试消抖时间内的快速变化
-    mock_button_press(1);
-    time_simulate_pass(BITS_BTN_DEBOUNCE_TIME_MS / 2);
-    mock_button_release(1);
-    time_simulate_pass(BITS_BTN_DEBOUNCE_TIME_MS / 2);
-    mock_button_press(1);
-    time_simulate_pass(BITS_BTN_DEBOUNCE_TIME_MS / 2);
-    mock_button_release(1);
-    
-    // 等待消抖完成
-    time_simulate_debounce_delay();
-    time_simulate_time_window_end();
-    
-    // 在消抖时间内的变化应该被忽略
-    printf("消抖边界情况测试通过: 消抖时间内的变化被正确处理\n");
-}
 
 void test_time_window_boundary(void) {
     printf("\n=== 测试时间窗口边界 ===\n");

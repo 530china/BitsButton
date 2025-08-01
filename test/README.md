@@ -1,382 +1,188 @@
-# BitsButton 测试框架 🧪
+# BitsButton 测试框架 v3.0
 
-这个目录包含了 BitsButton 项目的完整测试框架，专为嵌入式C项目设计的自研测试系统。
+## 概述
 
-## 🏗️ 目录结构
+BitsButton测试框架是一个分层架构的C语言测试系统，专门为BitsButton按键库设计。框架采用模块化设计，提供全面的测试覆盖和详细的测试报告。
 
+## 测试结果
+
+✅ **所有测试通过！** (35/35)
+- 测试成功率：100%
+- 覆盖范围：完整的功能、边界、性能和错误处理测试
+
+## 架构设计
+
+### 分层结构
 ```
 test/
-├── core/                    # 🎯 测试框架核心
-│   ├── test_framework.h     # 测试框架头文件
-│   ├── test_framework.c     # 测试框架实现
-│   ├── test_runner.h        # 测试运行器头文件
-│   └── test_runner.c        # 测试运行器实现
-├── utils/                   # 🛠️ 测试工具
-│   ├── assert_utils.h       # 断言工具
-│   ├── assert_utils.c       # 断言工具实现
-│   ├── mock_utils.h         # 模拟工具
-│   ├── mock_utils.c         # 模拟工具实现
-│   ├── time_utils.h         # 时间工具
-│   └── time_utils.c         # 时间工具实现
-├── cases/                   # 📋 测试用例
-│   ├── basic/               # 基础功能测试
-│   │   ├── test_initialization.c      # 初始化测试
-│   │   ├── test_single_operations.c   # 单按钮操作测试
-│   │   └── test_buffer_operations.c   # 缓冲区操作测试
-│   ├── combo/               # 组合按键测试
-│   │   ├── test_combo_buttons.c       # 基础组合按键测试
-│   │   └── test_advanced_combo.c      # 高级组合按键测试
-│   ├── edge/                # 边界条件测试
-│   │   ├── test_edge_cases.c          # 一般边界测试
-│   │   ├── test_state_machine_edge.c  # 状态机边界测试
-│   │   └── test_error_handling.c      # 错误处理测试
-│   └── performance/         # 性能测试
-│       └── test_performance.c         # 性能基准测试
-├── config/                  # ⚙️ 测试配置
-│   └── test_config.h        # 测试配置头文件
-├── scripts/                 # 🚀 测试脚本
-│   ├── run_tests.sh         # Linux/Mac 运行脚本
-│   └── run_tests.bat        # Windows 运行脚本
-├── cmake/                   # 🔧 CMake 配置
-│   └── CompilerFlags.cmake  # 编译器标志配置
-├── Unity/                   # 📚 Unity 测试框架
-│   └── src/                 # Unity 源码
-├── CMakeLists.txt          # CMake 构建配置
-├── test_main_new.c         # 测试主程序
-└── README.md               # 本文件
+├── core/           # 核心测试框架
+├── utils/          # 测试工具库
+├── cases/          # 测试用例
+│   ├── basic/      # 基础功能测试
+│   ├── combo/      # 组合按键测试
+│   ├── edge/       # 边界条件测试
+│   └── performance/# 性能测试
+├── config/         # 测试配置
+└── scripts/        # 构建脚本
 ```
 
-## ✨ 测试框架特性
+### 核心组件
 
-### 🎯 核心功能
-- **自定义测试框架**: 轻量级的 C 测试框架，专为嵌入式设计
-- **测试运行器**: 自动发现和运行测试用例
-- **断言工具**: 丰富的断言宏和函数
-- **模拟工具**: 硬件和系统调用模拟
-- **时间工具**: 时间相关的测试辅助函数
+#### 1. 测试框架核心 (core/)
+- **test_framework.h/c**: 测试框架基础设施
+- **test_runner.h/c**: 测试运行器和报告生成
 
-### 📊 测试覆盖统计（实际运行数据）
-测试类型 | 覆盖内容 | 测试数量
---- | --- | ---
-**基础功能** | 单击、双击、长按、连击 | 5个测试
-**组合按键** | 基本组合、高级组合、冲突处理 | 4个测试  
-**边界条件** | 超时、消抖、状态转换、时间窗口 | 8个测试
-**错误处理** | 空指针、无效参数、资源耗尽 | 4个测试
-**初始化配置** | 成功初始化、激活电平、自定义参数 | 5个测试
-**缓冲区操作** | 溢出保护、状态跟踪、边界情况 | 3个测试
-**总计** | **全面的功能覆盖** | **29个测试**
+#### 2. 测试工具库 (utils/)
+- **mock_utils.h/c**: 模拟工具，提供按键状态模拟
+- **time_utils.h/c**: 时间工具，处理时序测试
+- **assert_utils.h/c**: 断言工具，提供丰富的验证功能
 
-### 🚀 CI/CD 集成
-- **多平台支持**: Ubuntu, Windows, macOS 自动测试
-- **多编译器**: GCC + Clang 交叉验证
-- **自动化运行**: 每次提交自动触发测试
-- **结果上传**: 失败时自动保存调试信息
+#### 3. 测试用例 (cases/)
+- **basic/**: 基础功能测试（单击、双击、长按等）
+- **combo/**: 组合按键测试（多键组合、冲突处理）
+- **edge/**: 边界条件测试（超时、消抖、状态机边界）
+- **performance/**: 性能测试（高频处理、并发、稳定性）
 
-## 🚀 运行测试
+## 测试用例详情
 
-### 快速开始
+### 基础功能测试 (5个)
+1. **test_single_click_event** - 单击事件测试
+2. **test_double_click_event** - 双击事件测试
+3. **test_triple_click_event** - 快速双击测试
+4. **test_long_press_event** - 长按事件测试
+5. **test_long_press_hold_event** - 长按保持测试
+
+### 组合按键测试 (2个)
+1. **test_basic_combo_button** - 基本组合按键测试
+2. **test_combo_long_press** - 组合按键长按测试
+
+### 边界条件测试 (5个)
+1. **test_slow_double_click_timeout** - 超时双击测试
+2. **test_debounce_functionality** - 消抖功能测试
+3. **test_very_short_press** - 极短按键测试
+4. **test_long_press_boundary** - 长按边界测试
+5. **test_rapid_clicks_boundary** - 快速连击边界测试
+
+### 性能测试 (4个)
+1. **test_high_frequency_button_presses** - 高频按键处理测试
+2. **test_multiple_buttons_concurrent** - 多按键并发处理测试
+3. **test_long_running_stability** - 长时间运行稳定性测试
+4. **test_memory_usage** - 内存使用测试
+
+### 缓冲区测试 (3个)
+1. **test_buffer_overflow_protection** - 缓冲区溢出保护测试
+2. **test_buffer_state_tracking** - 缓冲区状态跟踪测试
+3. **test_buffer_edge_cases** - 缓冲区边界情况测试
+
+### 高级组合测试 (3个)
+1. **test_advanced_three_key_combo** - 三键组合测试
+2. **test_combo_with_different_timing** - 不同时序组合测试
+3. **test_multiple_combos_conflict** - 多组合键冲突测试
+
+### 状态机测试 (4个)
+1. **test_state_transition_timing** - 状态转换时序测试
+2. **test_time_window_boundary** - 时间窗口边界测试
+3. **test_long_press_period_boundary** - 长按周期边界测试
+4. **test_rapid_state_changes** - 快速状态变化测试
+
+### 错误处理测试 (4个)
+1. **test_null_pointer_handling** - 空指针处理测试
+2. **test_invalid_parameters** - 无效参数测试
+3. **test_boundary_values** - 边界值测试
+4. **test_resource_exhaustion** - 资源耗尽测试
+
+### 初始化测试 (5个)
+1. **test_successful_initialization** - 成功初始化测试
+2. **test_different_active_levels** - 不同激活电平测试
+3. **test_custom_parameters** - 自定义参数测试
+4. **test_multiple_button_initialization** - 多按键初始化测试
+5. **test_callback_functions** - 回调函数测试
+
+## 按键值编码规律
+
+BitsButton库使用位模式编码按键值：
+- **单击**: `0b010` (0x2)
+- **双击**: `0b01010` (0xA) 
+- **三连击**: `0b101010` (0x2A)
+- **四连击**: `0b10101010` (0xAA)
+- **五连击**: `0b1010101010` (0x2AA)
+- **长按**: `0b011` (0x3)
+
+编码规律：N连击 = (N-1) × `010` + `10`
+
+## 快速开始
+
+### 运行所有测试
 ```bash
-# 项目根目录一键测试
-./run_tests.bat     # Windows（项目根目录）
+# Windows
+.\run_tests.bat
+
+# Linux/macOS  
+./test/scripts/run_tests.sh
 ```
 
-### Windows 环境
-```batch
-# 方法1: 使用项目根目录脚本
-run_tests.bat
-
-# 方法2: 进入 test 目录
-cd test
-.\scripts\run_tests.bat
-
-# 方法3: 使用 CMake
-cd test
-mkdir build && cd build
-cmake -G "MinGW Makefiles" ..
-mingw32-make
-.\run_tests_new.exe
-```
-
-### Linux/Mac 环境
+### 清理重建
 ```bash
-# 方法1: 进入 test 目录
-cd test
-./scripts/run_tests.sh
+.\run_tests.bat clean
+```
 
-# 方法2: 使用 CMake
+### 手动构建
+```bash
 cd test
-mkdir build && cd build
+mkdir build
+cd build
 cmake ..
-make -j$(nproc)
-./run_tests_new
-```
-
-### 测试输出示例
-```
-========================================
-     BitsButton 测试框架 v3.0
-     分层架构 - 模块化设计
-========================================
-
-【单按键基础功能测试】
-✓ test_single_click_event: PASS
-✓ test_double_click_event: PASS  
-✓ test_triple_click_event: PASS
-✓ test_long_press_event: PASS
-✓ test_long_press_hold_event: PASS
-
-【组合按键功能测试】
-✓ test_basic_combo_button: PASS
-
-【边界条件测试】
-✓ test_slow_double_click_timeout: PASS
-✓ test_debounce_functionality: PASS
-
-【性能压力测试】
-✓ test_high_frequency_button_presses: PASS
-
-【缓冲区操作测试】
-✓ test_buffer_overflow_protection: PASS
-✓ test_buffer_state_tracking: PASS
-✓ test_buffer_edge_cases: PASS
-
-...
-
-========================================
-           测试完成
-========================================
------------------------
-29 Tests 0 Failures 0 Ignored
-OK
-========================================
-✅ 所有测试通过！
-========================================
-```
-
-## 🔧 开发指南
-
-### 添加新测试
-
-1. **选择合适的目录**：
-   - `basic/` - 基础功能测试
-   - `combo/` - 组合按键测试
-   - `edge/` - 边界条件测试
-   - `performance/` - 性能测试
-
-2. **创建测试文件**：
-   ```c
-   /* test_my_feature.c - 我的功能测试 */
-   #include "unity.h"
-   #include "core/test_framework.h"
-   #include "utils/mock_utils.h"
-   #include "utils/time_utils.h"
-   #include "utils/assert_utils.h"
-   #include "config/test_config.h"
-   #include "bits_button.h"
-   
-   void test_my_new_feature(void) {
-       printf("\n=== 测试我的新功能 ===\n");
-       
-       // 设置测试环境
-       test_framework_reset();
-       mock_reset_all_buttons();
-       
-       // 创建按键对象
-       static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
-       button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-       bits_button_init(&button, 1, NULL, 0, 
-                        test_framework_mock_read_button, 
-                        test_framework_event_callback, 
-                        test_framework_log_printf);
-       
-       // 执行测试逻辑
-       mock_button_click(1, STANDARD_CLICK_TIME_MS);
-       
-       // 验证结果
-       ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, EXPECTED_VALUE);
-       printf("我的新功能测试通过\n");
-   }
-   ```
-
-3. **在主程序中注册**：
-   在 `test_main_new.c` 中添加：
-   ```c
-   // 在外部函数声明区域添加
-   extern void test_my_new_feature(void);
-   
-   // 在 main() 函数的相应测试组中添加
-   int main(void) {
-       // ... 其他代码
-       
-       printf("\n【我的功能测试】\n");
-       RUN_TEST(test_my_new_feature);
-       
-       // ... 其他代码
-   }
-   ```
-
-4. **更新CMakeLists.txt**：
-   在 `test/CMakeLists.txt` 中将新的测试文件添加到源文件列表中。
-
-### 测试最佳实践
-
-#### ✅ 推荐做法
-- **独立性**: 每个测试都应该独立，不依赖其他测试
-- **清晰命名**: 使用描述性的测试函数名
-- **模拟硬件**: 使用 mock_utils 隔离硬件依赖
-- **边界测试**: 测试极端值和错误条件
-- **性能验证**: 关键路径添加性能测试
-
-#### ❌ 避免做法
-- 测试之间相互依赖
-- 硬编码的时间延迟
-- 忽略错误处理路径
-- 过于复杂的测试逻辑
-
-### 调试测试
-
-#### 启用详细输出
-```c
-// 在 test_config.h 中设置
-#define TEST_VERBOSE_OUTPUT 1
-#define TEST_DEBUG_ENABLED 1
-```
-
-#### 单独运行特定测试
-```bash
-# 使用环境变量过滤测试
-export TEST_FILTER="test_single_click"
-./run_tests_new
-```
-
-## ⚙️ 配置选项
-
-### test_config.h 配置
-```c
-// 测试超时设置
-#define TEST_TIMEOUT_MS 5000
-
-// 性能基准参数
-#define PERFORMANCE_TEST_ITERATIONS 1000
-#define PERFORMANCE_THRESHOLD_MS 10
-
-// 模拟硬件配置
-#define MOCK_BUTTON_COUNT 8
-#define MOCK_TIMER_RESOLUTION_MS 1
-
-// 调试选项
-#define TEST_VERBOSE_OUTPUT 0
-#define TEST_DEBUG_ENABLED 0
-```
-
-### CMake 配置选项
-```bash
-# 调试构建
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-
-# 发布构建
-cmake -DCMAKE_BUILD_TYPE=Release ..
-
-# 启用代码覆盖率
-cmake -DENABLE_COVERAGE=ON ..
-```
-
-## 🎯 CI/CD 集成
-
-### GitHub Actions 配置
-项目使用 `.github/workflows/stable-ci.yml` 进行自动化测试：
-
-```yaml
-# 多平台测试矩阵
-strategy:
-  matrix:
-    os: [ubuntu-latest, windows-latest, macos-latest]
-    compiler: [gcc, clang]
-
-# 测试步骤
-- name: 运行测试
-  run: |
-    cd test
-    mkdir build && cd build
-    cmake ..
-    make
-    ./run_tests_new
-```
-
-### 本地 CI 模拟
-```bash
-# 模拟 Ubuntu + GCC
-export CC=gcc && cd test && mkdir build && cd build && cmake .. && make && ./run_tests_new
-
-# 模拟 Ubuntu + Clang  
-export CC=clang && cd test && mkdir build && cd build && cmake .. && make && ./run_tests_new
-```
-
-## 📈 测试覆盖率
-
-### 生成覆盖率报告
-```bash
-# 启用覆盖率构建
-cd test/build
-cmake -DENABLE_COVERAGE=ON ..
 make
-
-# 运行测试并生成报告
 ./run_tests_new
-lcov --capture --directory . --output-file coverage.info
-genhtml coverage.info --output-directory coverage_html
 ```
 
-### 覆盖率目标
-- **行覆盖率**: > 90%
-- **函数覆盖率**: > 95%
-- **分支覆盖率**: > 85%
+## 配置说明
 
-## 🔍 故障排除
+### 测试配置 (test/config/test_config.h)
+```c
+#define MAX_TEST_EVENTS 100        // 最大测试事件数
+#define TEST_TIMEOUT_MS 5000       // 测试超时时间
+#define DEBOUNCE_TIME_MS 20        // 消抖时间
+#define LONG_PRESS_TIME_MS 1000    // 长按时间
+#define DOUBLE_CLICK_TIME_MS 300   // 双击时间窗口
+```
+
+## 测试工具
+
+### 模拟工具
+- `simulate_key_press(id, state)` - 模拟按键状态
+- `reset_test_state()` - 重置测试状态
+- `bits_btn_ticks(count)` - 模拟时间流逝
+
+### 断言工具
+- `ASSERT_EVENT_WITH_VALUE(id, event, value)` - 验证事件和值
+- `ASSERT_NO_EVENT(id, event)` - 验证事件不存在
+- `ASSERT_EVENT_COUNT(id, event, count)` - 验证事件数量
+
+## 持续集成
+
+测试框架支持多种CI环境：
+- GitHub Actions
+- 本地开发环境
+- Windows/Linux/macOS跨平台
+
+## 贡献指南
+
+1. 添加新测试用例时，请遵循现有的命名规范
+2. 确保测试用例有清晰的注释和预期结果
+3. 运行完整测试套件确保无回归
+4. 更新相关文档
+
+## 故障排除
 
 ### 常见问题
+1. **编译错误**: 检查CMake版本和编译器配置
+2. **测试失败**: 查看详细日志，检查期望值是否正确
+3. **性能问题**: 调整测试配置中的超时参数
 
-#### 编译错误
-```bash
-# 确保 C11 支持
-gcc --version  # 需要 GCC 4.9+
-clang --version  # 需要 Clang 3.1+
-```
-
-#### 测试失败
-```bash
-# 启用详细输出
-export TEST_VERBOSE=1
-./run_tests_new
-
-# 检查特定测试
-export TEST_FILTER="failing_test_name"
-./run_tests_new
-```
-
-#### Windows 构建问题
-```batch
-# 确保使用正确的 make 命令
-mingw32-make  # 而不是 make
-
-# 检查 MSYS2 环境
-pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
-```
-
-### 获取帮助
-- 查看 CI 日志了解自动化测试结果
-- 检查 `test/build/` 目录下的构建日志
-- 在项目 Issues 中报告问题
+### 调试技巧
+- 使用 `printf` 调试输出查看中间状态
+- 检查事件缓冲区状态
+- 验证时序参数设置
 
 ---
-
-## 🎉 总结
-
-BitsButton 测试框架提供了：
-- ✅ **完整的测试覆盖** - 29个测试用例覆盖所有核心功能
-- ✅ **多平台支持** - Windows, Linux, macOS 全覆盖
-- ✅ **CI/CD 集成** - 自动化质量保证
-- ✅ **开发友好** - 简单易用的测试 API
-- ✅ **高质量代码** - 严格的测试标准
-
-通过这个测试框架，BitsButton 项目确保了代码质量和跨平台兼容性！🚀
