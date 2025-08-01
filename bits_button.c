@@ -340,6 +340,65 @@ bool bits_button_get_key_result(bits_btn_result_t *result)
 }
 
 /**
+  * @brief  Reset all button states to idle.
+  *         This function should be called when resuming from low power mode
+  *         to clear any residual button states from before the pause.
+  * @retval None
+  */
+void bits_button_reset_states(void)
+{
+    bits_button_t *button = &bits_btn_entity;
+    
+    if (debug_printf)
+        debug_printf("Resetting all button states\n");
+    
+    // Reset all individual buttons
+    for (size_t i = 0; i < button->btns_cnt; i++)
+    {
+        button->btns[i].current_state = BTN_STATE_IDLE;
+        button->btns[i].last_state = BTN_STATE_IDLE;
+        button->btns[i].state_bits = 0;
+        button->btns[i].state_entry_time = 0;
+        button->btns[i].long_press_period_trigger_cnt = 0;
+    }
+    
+    // Reset all combo buttons
+    if (button->btns_combo != NULL && button->btns_combo_cnt > 0)
+    {
+        for (size_t i = 0; i < button->btns_combo_cnt; i++)
+        {
+            button_obj_combo_t *combo = &button->btns_combo[i];
+            combo->btn.current_state = BTN_STATE_IDLE;
+            combo->btn.last_state = BTN_STATE_IDLE;
+            combo->btn.state_bits = 0;
+            combo->btn.state_entry_time = 0;
+            combo->btn.long_press_period_trigger_cnt = 0;
+        }
+    }
+    
+    // Reset global button state and force mask synchronization
+    // This prevents spurious release events after reset
+    button_mask_type_t current_physical_mask = 0;
+    for(size_t i = 0; i < button->btns_cnt; i++)
+    {
+        uint8_t read_gpio_level = button->_read_button_level(&button->btns[i]);
+        if (read_gpio_level == button->btns[i].active_level)
+        {
+            current_physical_mask |= ((button_mask_type_t)1UL << i);
+        }
+    }
+    
+    button->current_mask = current_physical_mask;
+    button->last_mask = current_physical_mask;
+    button->state_entry_time = get_button_tick();
+    
+#ifdef BITS_BTN_BUFFER_SIZE
+    // Clear the event buffer
+    bits_btn_clear_buffer();
+#endif
+}
+
+/**
   * @brief  Add a bit to the end of the number
   * @param  state_bits: src number point.
   * @param  bit: tartget bit

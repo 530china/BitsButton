@@ -33,6 +33,7 @@ set(TEST_SOURCES
     cases/basic/test_single_operations.c
     cases/basic/test_buffer_operations.c
     cases/basic/test_initialization.c
+    cases/basic/test_state_reset.c
     
     # 测试用例 - 组合按键
     cases/combo/test_combo_buttons.c

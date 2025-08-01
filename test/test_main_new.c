@@ -12,6 +12,8 @@ extern void test_double_click_event(void);
 extern void test_triple_click_event(void);
 extern void test_long_press_event(void);
 extern void test_long_press_hold_event(void);
+extern void test_state_reset_functionality(void);
+extern void test_combo_button_reset(void);
 
 // 组合按键测试
 extern void test_basic_combo_button(void);
@@ -126,6 +128,8 @@ int main(void) {
     RUN_TEST(test_triple_click_event);
     RUN_TEST(test_long_press_event);
     RUN_TEST(test_long_press_hold_event);
+    RUN_TEST(test_state_reset_functionality);
+    RUN_TEST(test_combo_button_reset);
     
     printf("\n【组合按键功能测试】\n");
     RUN_TEST(test_basic_combo_button);
