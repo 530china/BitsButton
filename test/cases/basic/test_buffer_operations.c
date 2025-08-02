@@ -34,9 +34,11 @@ void test_buffer_overflow_protection(void) {
 
     // 记录初始的溢出计数
     size_t initial_overwrite_count = get_bits_btn_overwrite_count();
+    size_t initial_buffer_count = get_bits_btn_buffer_count();
     
     // 快速产生大量事件，超过缓冲区大小
-    for (int i = 0; i < BITS_BTN_BUFFER_SIZE + 5; i++) {
+    const int excess_events = BITS_BTN_BUFFER_SIZE + 5;
+    for (int i = 0; i < excess_events; i++) {
         mock_button_click(1, STANDARD_CLICK_TIME_MS);
         time_simulate_time_window_end();
         
@@ -46,25 +48,64 @@ void test_buffer_overflow_protection(void) {
     
     // 检查是否发生了溢出
     size_t final_overwrite_count = get_bits_btn_overwrite_count();
+    size_t final_buffer_count = get_bits_btn_buffer_count();
     
+    // 验证溢出保护机制
     if (final_overwrite_count > initial_overwrite_count) {
-        printf("✓ 缓冲区溢出保护正常工作: 溢出次数 = %zu\n", 
-               final_overwrite_count - initial_overwrite_count);
+        // 发生了溢出，这是预期的
+        size_t overflow_count = final_overwrite_count - initial_overwrite_count;
+        TEST_ASSERT_TRUE_MESSAGE(overflow_count > 0, "应该检测到缓冲区溢出");
+        printf("✓ 缓冲区溢出保护正常工作: 溢出次数 = %zu\n", overflow_count);
+        
+        // 验证缓冲区大小没有超过限制
+        TEST_ASSERT_TRUE_MESSAGE(final_buffer_count <= BITS_BTN_BUFFER_SIZE, 
+                                 "缓冲区大小不应超过最大限制");
     } else {
+        // 没有溢出，说明缓冲区容量足够大
         printf("✓ 缓冲区未溢出，容量足够\n");
+        
+        // 验证所有事件都被正确存储
+        TEST_ASSERT_TRUE_MESSAGE(final_buffer_count >= initial_buffer_count, 
+                                 "缓冲区应该包含新增的事件");
     }
     
-    // 验证缓冲区状态检查函数
+    // 验证缓冲区状态检查函数的正确性
     bool is_full = bits_btn_is_buffer_full();
     bool is_empty = bits_btn_is_buffer_empty();
     size_t buffer_count = get_bits_btn_buffer_count();
+    
+    // 基本状态一致性检查
+    TEST_ASSERT_FALSE_MESSAGE(is_full && is_empty, "缓冲区不能同时为满和空");
+    
+    if (is_empty) {
+        TEST_ASSERT_EQUAL_MESSAGE(0, buffer_count, "空缓冲区的元素数量应该为0");
+    } else {
+        TEST_ASSERT_TRUE_MESSAGE(buffer_count > 0, "非空缓冲区的元素数量应该大于0");
+    }
+    
+    if (is_full) {
+        TEST_ASSERT_TRUE_MESSAGE(buffer_count >= BITS_BTN_BUFFER_SIZE * 0.8, 
+                                 "满缓冲区的元素数量应该接近最大值");
+    }
     
     printf("缓冲区状态: 满=%s, 空=%s, 元素数量=%zu\n", 
            is_full ? "是" : "否", 
            is_empty ? "是" : "否", 
            buffer_count);
     
-    printf("缓冲区溢出保护测试通过\n");
+    // 验证系统在溢出后仍能正常工作
+    test_framework_reset();  // 清理事件缓冲区
+    mock_button_click(1, STANDARD_CLICK_TIME_MS);
+    time_simulate_time_window_end();
+    bits_button_ticks();
+    
+    // 应该能正常获取新事件
+    bits_btn_result_t result;
+    bool got_result = bits_button_get_key_result(&result);
+    TEST_ASSERT_TRUE_MESSAGE(got_result, "溢出后系统应该仍能正常处理新事件");
+    TEST_ASSERT_EQUAL_MESSAGE(1, result.key_id, "事件内容应该正确");
+    
+    printf("✓ 缓冲区溢出保护测试通过\n");
 }
 
 void test_buffer_state_tracking(void) {

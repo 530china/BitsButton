@@ -180,41 +180,91 @@ void test_callback_functions(void) {
     // 测试不同的回调函数组合
     
     // 1. 只有事件回调，没有调试回调
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     NULL);  // 无调试回调
+    printf("测试场景1: 只有事件回调，没有调试回调\n");
+    int32_t init_result1 = bits_button_init(&button, 1, NULL, 0,
+                                           test_framework_mock_read_button, 
+                                           test_framework_event_callback, 
+                                           NULL);  // 无调试回调
+    
+    TEST_ASSERT_EQUAL_MESSAGE(0, init_result1, "只有事件回调的初始化应该成功");
     
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
+    // 验证事件回调正常工作
     ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    printf("✓ 事件回调正常工作\n");
     
     // 清空事件
     test_framework_clear_events();
     
     // 2. 没有事件回调，只有调试回调
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button, 
-                     NULL,  // 无事件回调
-                     test_framework_log_printf);
+    printf("测试场景2: 没有事件回调，只有调试回调\n");
+    int32_t init_result2 = bits_button_init(&button, 1, NULL, 0,
+                                           test_framework_mock_read_button, 
+                                           NULL,  // 无事件回调
+                                           test_framework_log_printf);
+    
+    TEST_ASSERT_EQUAL_MESSAGE(0, init_result2, "只有调试回调的初始化应该成功");
+    
+    int initial_event_count = test_framework_get_event_count();
     
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    // 没有事件回调，所以不会记录事件，但系统不应该崩溃
+    // 验证没有事件回调时不会记录事件，但系统不应该崩溃
+    int final_event_count = test_framework_get_event_count();
+    TEST_ASSERT_EQUAL_MESSAGE(initial_event_count, final_event_count, 
+                             "没有事件回调时不应该记录事件");
+    printf("✓ 无事件回调时系统正常运行，不记录事件\n");
     
     // 3. 都没有回调
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button, 
-                     NULL,  // 无事件回调
-                     NULL); // 无调试回调
+    printf("测试场景3: 都没有回调\n");
+    int32_t init_result3 = bits_button_init(&button, 1, NULL, 0,
+                                           test_framework_mock_read_button, 
+                                           NULL,  // 无事件回调
+                                           NULL); // 无调试回调
+    
+    TEST_ASSERT_EQUAL_MESSAGE(0, init_result3, "无回调的初始化应该成功");
+    
+    int initial_event_count2 = test_framework_get_event_count();
     
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    // 系统应该能正常运行，不崩溃
+    // 验证系统能正常运行，不崩溃，也不记录事件
+    int final_event_count2 = test_framework_get_event_count();
+    TEST_ASSERT_EQUAL_MESSAGE(initial_event_count2, final_event_count2, 
+                             "无回调时不应该记录事件");
+    printf("✓ 无回调时系统正常运行，不崩溃\n");
     
-    printf("回调函数测试通过: 各种回调组合都能正常工作\n");
+    // 4. 验证读取按键函数为NULL的错误处理
+    printf("测试场景4: 读取按键函数为NULL的错误处理\n");
+    int32_t init_result4 = bits_button_init(&button, 1, NULL, 0,
+                                           NULL,  // 无读取函数 - 这应该失败
+                                           test_framework_event_callback, 
+                                           test_framework_log_printf);
+    
+    TEST_ASSERT_NOT_EQUAL_MESSAGE(0, init_result4, 
+                                 "读取按键函数为NULL时初始化应该失败");
+    printf("✓ 读取按键函数为NULL时正确返回错误\n");
+    
+    // 5. 恢复正常配置进行最终验证
+    printf("测试场景5: 恢复完整回调配置\n");
+    int32_t init_result5 = bits_button_init(&button, 1, NULL, 0,
+                                           test_framework_mock_read_button, 
+                                           test_framework_event_callback, 
+                                           test_framework_log_printf);
+    
+    TEST_ASSERT_EQUAL_MESSAGE(0, init_result5, "完整回调配置的初始化应该成功");
+    
+    test_framework_clear_events();
+    mock_button_click(1, STANDARD_CLICK_TIME_MS);
+    time_simulate_time_window_end();
+    
+    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    printf("✓ 完整回调配置正常工作\n");
+    
+    printf("✓ 回调函数测试通过: 所有回调组合都经过验证\n");
 }
 
