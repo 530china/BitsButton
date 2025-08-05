@@ -67,7 +67,7 @@ static void bits_btn_init_buffer(void)
     atomic_init(&overwrite_count, 0);
 }
 
- bool bits_btn_is_buffer_empty()
+bool bits_btn_is_buffer_empty(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -76,7 +76,7 @@ static void bits_btn_init_buffer(void)
     return current_read == current_write;
 }
 
-bool bits_btn_is_buffer_full()
+bool bits_btn_is_buffer_full(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -596,20 +596,6 @@ static void handle_button_state(struct button_obj_t* button, button_mask_type_t 
 {
     uint8_t pressed = (current_mask & btn_mask) == btn_mask? 1 : 0;
     update_button_state_machine(button, pressed);
-}
-
-/**
-  * @brief  Calculate the number of set bits (1s) in an unsigned integer.
-  * @param  w: The unsigned integer to be calculated.
-  * @retval The number of set bits in the integer.
-  * more see: http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-  */
-static inline POPCOUNT_TYPE_T __popcount(POPCOUNT_TYPE_T w)
-{
-    w = w - ((w >> 1) & (POPCOUNT_TYPE_T) ~(POPCOUNT_TYPE_T)0 / 3);
-    w = (w & (POPCOUNT_TYPE_T) ~(POPCOUNT_TYPE_T)0 / 15 * 3) + ((w >> 2) & (POPCOUNT_TYPE_T) ~(POPCOUNT_TYPE_T)0 / 15 * 3);
-    w = (w + (w >> 4)) & (POPCOUNT_TYPE_T) ~(POPCOUNT_TYPE_T)0 / 255 * 15;
-    return (POPCOUNT_TYPE_T)(w * ((POPCOUNT_TYPE_T) ~(POPCOUNT_TYPE_T)0 / 255)) >> (sizeof(POPCOUNT_TYPE_T) - 1) * 8;
 }
 
 /**
