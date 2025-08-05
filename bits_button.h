@@ -58,9 +58,9 @@ typedef enum {
 #endif
 
 #define BITS_BUTTON_INIT(_key_id, _active_level, _param)                                                                                                    \
-    {                                                                                                                                                       \
-        .key_id = _key_id, .active_level = _active_level, .param = _param,                                                                                  \
-    }
+{                                                                                                                                                           \
+    .key_id = _key_id, .active_level = _active_level, .param = _param,                                                                                      \
+}
 
 #define BITS_BUTTON_COMBO_INIT(_key_id, _active_level, _param, _key_single_ids, _key_count, _single_key_suppress)                                           \
 {                                                                                                                                                           \
