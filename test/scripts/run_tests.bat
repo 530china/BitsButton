@@ -63,7 +63,7 @@ if "%CI_MODE%"=="true" (
 if %errorlevel% neq 0 (
     echo ❌ CMake配置失败！
     echo 当前目录: %CD%
-    echo 查找CMakeLists.txt: 
+    echo 查找CMakeLists.txt:
     if exist "..\CMakeLists.txt" (
         echo   ✓ 找到 ..\CMakeLists.txt
     ) else (
@@ -114,6 +114,64 @@ echo.
 echo ========================================
 if !test_result! equ 0 (
     echo ✅ 所有测试通过！
+
+    REM 额外执行编译配置验证
+    echo.
+    echo 🔧 【额外验证】编译配置兼容性
+    echo ----------------------------------------
+
+    REM 切换到项目根目录进行编译测试
+    cd /d "%TEST_DIR%\.."
+
+    echo 测试编译指令1: gcc -c -DBITS_BTN_DISABLE_BUFFER -std=c99 bits_button.c
+    gcc -c -DBITS_BTN_DISABLE_BUFFER -std=c99 bits_button.c -o bits_button_disable.o 2>compile_error1.log
+    if !errorlevel! equ 0 (
+        echo ✅ 禁用缓冲区模式 C99 编译成功
+        if exist "bits_button_disable.o" del "bits_button_disable.o" 2>nul
+        if exist "compile_error1.log" del "compile_error1.log" 2>nul
+    ) else (
+        echo ❌ 禁用缓冲区模式 C99 编译失败
+        echo 错误信息：
+        if exist "compile_error1.log" (
+            type "compile_error1.log"
+            del "compile_error1.log" 2>nul
+        )
+    )
+
+    echo 测试编译指令2: gcc -c -DBITS_BTN_USE_USER_BUFFER -std=c99 bits_button.c
+    gcc -c -DBITS_BTN_USE_USER_BUFFER -std=c99 bits_button.c -o bits_button_user.o 2>compile_error2.log
+    if !errorlevel! equ 0 (
+        echo ✅ 用户缓冲区模式 C99 编译成功
+        if exist "bits_button_user.o" del "bits_button_user.o" 2>nul
+        if exist "compile_error2.log" del "compile_error2.log" 2>nul
+    ) else (
+        echo ❌ 用户缓冲区模式 C99 编译失败
+        echo 错误信息：
+        if exist "compile_error2.log" (
+            type "compile_error2.log"
+            del "compile_error2.log" 2>nul
+        )
+    )
+
+    echo 测试编译指令3: gcc -c -std=c11 bits_button.c
+    gcc -c -std=c11 bits_button.c -o bits_button_default.o 2>compile_error3.log
+    if !errorlevel! equ 0 (
+        echo ✅ 默认模式 C11 编译成功
+        if exist "bits_button_default.o" del "bits_button_default.o" 2>nul
+        if exist "compile_error3.log" del "compile_error3.log" 2>nul
+    ) else (
+        echo ❌ 默认模式 C11 编译失败
+        echo 错误信息：
+        if exist "compile_error3.log" (
+            type "compile_error3.log"
+            del "compile_error3.log" 2>nul
+        )
+    )
+
+    echo ✅ 编译配置兼容性验证完成！
+
+    REM 返回到构建目录
+    cd /d "%TEST_DIR%\build"
 ) else (
     echo ❌ 测试失败！退出码: !test_result!
 )

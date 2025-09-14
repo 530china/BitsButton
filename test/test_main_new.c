@@ -113,15 +113,15 @@ void tearDown(void) {
 int main(void) {
     // 初始化Unity测试框架
     UNITY_BEGIN();
-    
+
     printf("========================================\n");
     printf("     BitsButton 测试框架 v3.0\n");
     printf("     分层架构 - 模块化设计\n");
     printf("========================================\n\n");
-    
+
     // 初始化测试框架
     test_framework_init();
-    
+
     printf("【单按键基础功能测试】\n");
     RUN_TEST(test_single_click_event);
     RUN_TEST(test_double_click_event);
@@ -130,60 +130,60 @@ int main(void) {
     RUN_TEST(test_long_press_hold_event);
     RUN_TEST(test_state_reset_functionality);
     RUN_TEST(test_combo_button_reset);
-    
+
     printf("\n【组合按键功能测试】\n");
     RUN_TEST(test_basic_combo_button);
     RUN_TEST(test_combo_long_press);
-    
+
     printf("\n【边界条件测试】\n");
     RUN_TEST(test_slow_double_click_timeout);
     RUN_TEST(test_debounce_functionality);
     RUN_TEST(test_very_short_press);
     RUN_TEST(test_long_press_boundary);
     RUN_TEST(test_rapid_clicks_boundary);
-    
+
     printf("\n【性能压力测试】\n");
     RUN_TEST(test_high_frequency_button_presses);
     RUN_TEST(test_multiple_buttons_concurrent);
     RUN_TEST(test_long_running_stability);
     RUN_TEST(test_memory_usage);
-    
+
     printf("\n【缓冲区操作测试】\n");
     RUN_TEST(test_buffer_overflow_protection);
     RUN_TEST(test_buffer_state_tracking);
     RUN_TEST(test_buffer_edge_cases);
-    
+
     printf("\n【高级组合按键测试】\n");
     RUN_TEST(test_advanced_three_key_combo);
     RUN_TEST(test_combo_with_different_timing);
     RUN_TEST(test_multiple_combos_conflict);
-    
+
     printf("\n【状态机边界测试】\n");
     RUN_TEST(test_state_transition_timing);
     RUN_TEST(test_time_window_boundary);
     RUN_TEST(test_long_press_period_boundary);
     RUN_TEST(test_rapid_state_changes);
-    
+
     printf("\n【错误处理测试】\n");
     RUN_TEST(test_null_pointer_handling);
     RUN_TEST(test_invalid_parameters);
     RUN_TEST(test_boundary_values);
     RUN_TEST(test_resource_exhaustion);
-    
+
     printf("\n【初始化配置测试】\n");
     RUN_TEST(test_successful_initialization);
     RUN_TEST(test_different_active_levels);
     RUN_TEST(test_custom_parameters);
     RUN_TEST(test_multiple_button_initialization);
     RUN_TEST(test_callback_functions);
-    
+
     printf("\n========================================\n");
     printf("           测试完成\n");
     printf("========================================\n");
-    
+
     // 清理资源
     test_framework_cleanup();
-    
+
     // 返回测试结果
     return UNITY_END();
 }

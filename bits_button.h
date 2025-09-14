@@ -3,11 +3,6 @@
 
 #include "stdint.h"
 #include "stdio.h"
-#include "stdbool.h"
-
-#ifndef BITS_BTN_BUFFER_SIZE
-#define BITS_BTN_BUFFER_SIZE        10
-#endif
 
 #ifndef BITS_BTN_MAX_COMBO_BUTTONS
 #define BITS_BTN_MAX_COMBO_BUTTONS  8 // 默认最大支持8个组合按钮
@@ -55,6 +50,14 @@ typedef enum {
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#endif
+
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
 #endif
 
 #define BITS_BUTTON_INIT(_key_id, _active_level, _param)                                                                                                    \
@@ -125,6 +128,20 @@ typedef struct bits_button
     uint16_t combo_sorted_indices[BITS_BTN_MAX_COMBO_BUTTONS];
 } bits_button_t;
 
+// Buffer operation interface for unified buffer management
+typedef struct
+{
+    void (*init)(void);
+    uint8_t (*write)(bits_btn_result_t *result);
+    uint8_t (*read)(bits_btn_result_t *result);
+    uint8_t (*is_empty)(void);
+    uint8_t (*is_full)(void);
+    size_t (*get_buffer_used_count)(void);
+    void (*clear)(void);
+    size_t (*get_buffer_overwrite_count)(void);
+    size_t (*get_buffer_capacity)(void);
+} bits_btn_buffer_ops_t;
+
 /**
   * @brief  Initialize the button structure and configure button detection parameters.
   *         This function sets up the button system, including single and combination buttons,
@@ -168,12 +185,12 @@ void bits_button_ticks(void);
 /**
   * @brief  Get the button key result from the buffer.
   * @param  result: Pointer to store the button key result
-  * @retval true if read successfully, false if the buffer is empty.
+  * @retval true(1) if read successfully, false if the buffer is empty.
   */
-bool bits_button_get_key_result(bits_btn_result_t *result);
+ uint8_t bits_button_get_key_result(bits_btn_result_t *result);
 
 /**
-  * @brief  Reset all button states to idle. 
+  * @brief  Reset all button states to idle.
   *         This function should be called when resuming from low power mode
   *         to clear any residual button states from before the pause.
   * @retval None
@@ -184,24 +201,42 @@ void bits_button_reset_states(void);
   * @brief  Get the number of buffer overwrites.
   * @retval The number of buffer overwrites.
   */
-size_t get_bits_btn_overwrite_count(void);
+size_t get_bits_btn_buffer_overwrite_count(void);
 
 /**
-  * @brief  Get the approximate number of elements in the ring buffer.
-  * @retval The approximate number of elements in the buffer.
+  * @brief  Get the number of button events currently stored in the buffer.
+  * @retval The number of used buffer elements (pending button events).
   */
-size_t get_bits_btn_buffer_count(void);
+size_t get_bits_btn_buffer_used_count(void);
 
 /**
   * @brief  Check if the ring buffer is full.
-  * @retval true if the buffer is full, false otherwise.
+  * @retval true(1) if the buffer is full, false otherwise.
   */
-bool bits_btn_is_buffer_full(void);
+uint8_t bits_btn_is_buffer_full(void);
 
 /**
   * @brief  Check if the ring buffer is empty.
-  * @retval true if the buffer is empty, false otherwise.
+  * @retval true(1) if the buffer is empty, false otherwise.
   */
-bool bits_btn_is_buffer_empty(void);
+uint8_t bits_btn_is_buffer_empty(void);
 
+/**
+  * @brief  Set custom buffer operations for external buffer management.
+  *         This function allows users to register their own buffer implementation
+  *         by providing a set of buffer operation functions.
+  * @param  user_buffer_ops: Pointer to user-defined buffer operations structure.
+  *                         Pass NULL to restore default buffer operations.
+  * @retval None
+  * @note   This function should be called before bits_button_init().
+  */
+void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops);
+
+/**
+  * @brief  Get the total capacity of the button result buffer.
+  *         This function returns the maximum number of button events that
+  *         can be stored in the buffer.
+  * @retval The total buffer capacity in number of elements. Returns 0 if buffer is disabled.
+  */
+size_t get_bits_btn_buffer_capacity(void);
 #endif
