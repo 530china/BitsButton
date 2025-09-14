@@ -13,7 +13,7 @@
 <h2> 一、简介👋</h2>
 ​​BitsButton是一款针对嵌入式系统优化的按键检测框架​​。通过创新的二进制位序列技术，它能高效处理单键、组合键（如Ctrl+C）和复杂按键序列（如单击→长按→双击），提供从按键按下到释放的全生命周期跟踪。独特的无锁环形缓冲设计确保多线程环境下事件不丢失，显著简化了传统按键逻辑的实现复杂度，特别适用于资源受限的嵌入式设备和复杂人机交互场景。
 
-## 二、工程结构 
+## 二、工程结构
 
 ```
 BitsButton/
@@ -55,21 +55,51 @@ BitsButton/
 ​​序列识别 | 支持复杂按键序列（如单击-长按，单击-长按-双击等操作流）
 ​​事件类型 | 支持按下/抬起/单击/双击/连击/长按(开始/保持/结束)，完整覆盖按键生命周期
 
-> 🚀**3.高性能内核​**
+> 🔧**3.灵活的缓冲区架构**
 ```c
+// 统一的缓冲区操作接口（支持多种实现）
 typedef struct {
-    bits_btn_result_t buffer[BITS_BTN_BUFFER_SIZE];
-    atomic_size_t read_idx;   // 无锁原子操作
-    atomic_size_t write_idx;
-} bits_btn_ring_buffer_t;
+    void (*init)(void);
+    uint8_t (*write)(bits_btn_result_t *result);
+    uint8_t (*read)(bits_btn_result_t *result);
+    uint8_t (*is_empty)(void);
+    uint8_t (*is_full)(void);
+    size_t (*get_buffer_used_count)(void);
+    void (*clear)(void);
+    size_t (*get_buffer_overwrite_count)(void);
+    size_t (*get_buffer_capacity)(void);
+} bits_btn_buffer_ops_t;
+
+// 编译时缓冲区模式选择机制：
+#ifdef BITS_BTN_DISABLE_BUFFER
+    // 模式1：禁用缓冲区 - 最小内存占用
+    static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = NULL;
+#elif defined(BITS_BTN_USE_USER_BUFFER)
+    // 模式2：用户自定义缓冲区 - 完全自主控制
+    static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = NULL;
+    void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops);
+#else
+    // 模式3（默认）：C11原子缓冲区 - 高性能无锁设计
+    typedef struct {
+        bits_btn_result_t buffer[BITS_BTN_BUFFER_SIZE];
+        atomic_size_t read_idx;   // 无锁原子操作
+        atomic_size_t write_idx;
+    } bits_btn_ring_buffer_t;
+#endif
 ```
 
-- SPSC(单生产者单消费者)线程安全模型;
-- 无锁设计+原子操作;
-- 缓冲区溢出检测与统计;
-- 轻量化处理（RAM <20字节/按键）;
+**🎯 架构亮点：**
+- **统一接口设计**: 无论哪种模式，都通过同一套 `bits_btn_buffer_ops_t` 接口访问
+- **编译时选择**: 通过条件编译实现三种模式的无缝切换
+- **零运行时开销**: 缓冲区模式在编译时确定，无动态分发成本
+- **模块化设计**: 每种模式都是完全独立的实现单元
 
-![alt text](docs/image-1.png)
+**🚀 性能特性：**
+- **SPSC(单生产者单消费者)线程安全模型** (C11模式)
+- **无锁设计+原子操作** (C11模式)
+- **缓冲区溢出检测与统计** (全模式支持)
+- **轻量化处理** (RAM <20字节/按键)
+- **C标准兼容性**: 支持C89/C99/C11
 
 > 🧩**4.​​模块化架构**
 
@@ -120,12 +150,27 @@ typedef struct {
 ## 五、快速开始
 
 ### 0）编译环境要求
-**⚠️ 编译器必须支持 C11 标准**
+**⚠️ 编译器支持 C89/C99/C11 标准**
 
-#### 核心依赖的 C11 特性：
-- `_Atomic` 类型（内核无锁设计的核心）
-- `<stdatomic.h>` 原子操作库（内存序模型基础）
-- **匿名结构体**（简化核心数据结构设计）
+#### 🔧 灵活的缓冲区配置模式：
+
+**缓冲区模式** | **编译指令** | **适用场景** | **C标准要求**
+--- | --- | --- | ---
+**默认C11原子缓冲区** | `gcc -c -std=c11 bits_button.c` | 多线程环境，高性能要求 | C11（支持`_Atomic`、`<stdatomic.h>`）
+**禁用缓冲区模式** | `gcc -c -DBITS_BTN_DISABLE_BUFFER -std=c99 bits_button.c` | 资源极度受限，只需回调模式 | C89/C99
+**用户自定义缓冲区** | `gcc -c -DBITS_BTN_USE_USER_BUFFER -std=c99 bits_button.c` | 需要自定义缓冲区实现 | C89/C99
+
+#### 🎯 编译配置示例：
+```bash
+# 默认模式（推荐）- 无锁环形缓冲，多线程安全
+gcc -c -std=c11 bits_button.c
+
+# 禁用缓冲区 - 极简模式，适用于资源受限环境
+gcc -c -DBITS_BTN_DISABLE_BUFFER -std=c99 bits_button.c
+
+# 用户缓冲区 - 使用自定义缓冲区实现
+gcc -c -DBITS_BTN_USE_USER_BUFFER -std=c99 bits_button.c
+```
 
 ### 1）快速测试
 
@@ -163,7 +208,105 @@ make
 - [使用poll方式](examples/example_poll.c);
 <br></details>
 
-### 4）进阶调试
+### 4）缓冲区模式详细说明
+
+<details>
+<summary>点击展开/折叠缓冲区配置详情<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
+
+#### 🎯 模式一：默认C11原子缓冲区（推荐）
+```c
+// 编译命令（默认模式）
+gcc -c -std=c11 bits_button.c
+
+// 代码使用
+bits_button_init(
+    btns, ARRAY_SIZE(btns),
+    btns_combo, ARRAY_SIZE(btns_combo),
+    read_key_state,
+    bits_btn_result_cb,
+    my_log_printf
+);
+
+// 轮询方式获取事件
+bits_btn_result_t result;
+while (bits_button_get_key_result(&result)) {
+    // 处理按键事件
+    printf("Key: %d, Event: %d\n", result.key_id, result.event);
+}
+```
+**优点**: 无锁环形缓冲、多线程安全、高性能
+**缺点**: 需要C11编译器支持
+**适用**: 多线程环境、高性能要求的应用
+
+#### 🔧 模式二：禁用缓冲区模式
+```c
+// 编译命令
+gcc -c -DBITS_BTN_DISABLE_BUFFER -std=c99 bits_button.c
+
+// 代码使用（只能使用回调模式）
+bits_button_init(
+    btns, ARRAY_SIZE(btns),
+    btns_combo, ARRAY_SIZE(btns_combo),
+    read_key_state,
+    bits_btn_result_cb,  // 必填：事件通过回调直接处理
+    my_log_printf
+);
+
+// 注意：bits_button_get_key_result() 不可用
+```
+**优点**: 最小内存占用、C89/C99兼容
+**缺点**: 不支持轮询模式、事件不能缓存
+**适用**: 资源极度受限的嵌入式环境
+
+#### ⚙️ 模式三：用户自定义缓冲区
+```c
+// 编译命令
+gcc -c -DBITS_BTN_USE_USER_BUFFER -std=c99 bits_button.c
+
+// 实现自定义缓冲区操作
+static bits_btn_result_t my_buffer[MY_BUFFER_SIZE];
+static size_t my_read_idx = 0, my_write_idx = 0;
+
+static uint8_t my_buffer_write(bits_btn_result_t *result) {
+    // 实现你的缓冲区写入逻辑
+    // ...
+    return true;
+}
+
+static uint8_t my_buffer_read(bits_btn_result_t *result) {
+    // 实现你的缓冲区读取逻辑
+    // ...
+    return true;
+}
+
+// 定义缓冲区操作接口
+static const bits_btn_buffer_ops_t my_buffer_ops = {
+    .init = my_buffer_init,
+    .write = my_buffer_write,
+    .read = my_buffer_read,
+    .is_empty = my_buffer_is_empty,
+    .is_full = my_buffer_is_full,
+    // ... 其他操作函数
+};
+
+// 代码使用
+bits_button_set_buffer_ops(&my_buffer_ops);  // 设置自定义缓冲区
+bits_button_init(/* ... */);
+```
+**优点**: 完全控制缓冲区实现、C89/C99兼容
+**缺点**: 需要实现完整的缓冲区接口
+**适用**: 有特殊缓冲区需求的应用场景
+
+#### 🤔 如何选择缓冲区模式？
+
+**选择流程图：**
+1. **支持C11且有多线程？** → 选择模式一（默认C11原子缓冲区）
+2. **资源极度受限？** → 选择模式二（禁用缓冲区）
+3. **需要特殊缓冲区实现？** → 选择模式三（用户自定义缓冲区）
+
+<br></details>
+
+### 5）进阶调试
 
 <details>
 <summary>点击展开/折叠<img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></summary>
@@ -198,11 +341,13 @@ BitsButton 配备了完整的 **GitHub Actions CI/CD 流水线**：
 平台 | 编译器 | 状态
 --- | --- | ---
 **Ubuntu** | GCC + Clang | ✅ 自动测试
-**Windows** | MinGW-GCC | ✅ 自动测试  
+**Windows** | MinGW-GCC | ✅ 自动测试
 **macOS** | Clang | ✅ 自动测试
 
 ### 📊 质量保证
 - **自动化测试**: 每次提交自动运行完整测试套件
+- **编译配置验证**: 自动测试C11/C99/C89标准兼容性
+- **缓冲区模式测试**: 验证禁用缓冲区、用户缓冲区、默认缓冲区模式
 - **代码质量检查**: 基础静态分析，确保代码质量
 - **多编译器验证**: 确保跨平台兼容性
 - **测试结果上传**: 失败时自动保存调试信息
@@ -238,23 +383,33 @@ BitsButton 配备了完整的**按键测试用例**，专为嵌入式C项目设�
 测试类型 | 覆盖内容 | 测试数量
 --- | --- | ---
 **基础功能** | 单击、双击、长按、连击 | 5+ 测试
-**组合按键** | 多键组合、组合长按 | 4+ 测试  
+**组合按键** | 多键组合、组合长按 | 4+ 测试
 **边界条件** | 超时、消抖、极限情况 | 6+ 测试
 **性能测试** | 高频按键、并发处理 | 5+ 测试
+**编译配置** | C11/C99缓冲区模式兼容性 | 3+ 编译指令验证
 
 ## ⚡ 其他
 - 本项目基于本人实际开发中遇到的一些按键驱动使用体验问题，在他人项目（见参考链接）的思想基础上，开发的此按键检测框架，感谢帮助思考我的小伙伴[shawnfeng0](https://github.com/shawnfeng0)以及正在使用此模块的小伙伴，欢迎一起开发改进！
 
 ## 🤝 参与开发
 欢迎贡献代码！当前路线图
+
+**🎉 已完成特性**
 - [x] 基础按键检测功能
 - [x] 组合按键支持
-- [x] 按键结果高性能缓冲区支持
+- [x] **多模式缓冲区支持** ✨ **新特性！**
+  - [x] 默认C11原子缓冲区（高性能、多线程安全）
+  - [x] 禁用缓冲区模式（最小内存占用）
+  - [x] 用户自定义缓冲区模式（灵活配置）
+- [x] **C标准兼容性支持** ✨ **C89/C99/C11全支持！**
 - [x] 按键模拟器Window环境支持
 - [x] 按键模拟器Linux/macOS环境支持
 - [x] **自动化测试框架支持** ✨ **已完成完整测试框架！**
+- [x] **编译配置兼容性测试** ✨ **已集成到CI流程！**
 - [x] **CI/CD集成支持** ✨ **已完成稳定的多平台CI！**
 - [x] 更多应用示例
+
+**📅 计划中特性**
 - [ ] 测试覆盖率统计
 - [ ] 性能基准测试
 - [ ] 更多硬件平台适配

@@ -1,13 +1,40 @@
 #include "bits_button.h"
 #include "string.h"
-#include <stdatomic.h>
-
-// static struct button_obj_t* button_list_head = NULL;
-#define POPCOUNT_TYPE_T button_mask_type_t
 
 static bits_button_t bits_btn_entity;
+static bits_btn_debug_printf_func debug_printf = NULL;
+static void debug_print_binary(key_value_type_t num);
 
-#ifdef BITS_BTN_BUFFER_SIZE
+// ============================================================================
+// Buffer Implementation Selection
+// ============================================================================
+
+#ifdef BITS_BTN_DISABLE_BUFFER
+
+// Disabled buffer mode - no buffer operations
+static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = NULL;
+
+#elif defined(BITS_BTN_USE_USER_BUFFER)
+
+// User buffer mode - buffer operations set by user
+static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = NULL;
+
+void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops)
+{
+    if (user_buffer_ops != NULL)
+    {
+        bits_btn_buffer_ops = user_buffer_ops;
+    }
+}
+
+#else
+// Default C11 atomic buffer implementation
+#include <stdatomic.h>
+
+#ifndef BITS_BTN_BUFFER_SIZE
+#define BITS_BTN_BUFFER_SIZE        10
+#endif
+
 typedef struct
 {
     bits_btn_result_t buffer[BITS_BTN_BUFFER_SIZE];
@@ -16,49 +43,14 @@ typedef struct
 } bits_btn_ring_buffer_t;
 
 static atomic_size_t overwrite_count = 0;
-static bits_btn_debug_printf_func debug_printf = NULL;
 static bits_btn_ring_buffer_t ring_buffer;
 
-static bool bits_btn_read_buffer(bits_btn_result_t *result);
-#endif
-
-static void debug_print_binary(key_value_type_t num);
-
-/**
-  * @brief  Find the index of a button object by its key ID within the button array.
-  *         This is a helper function used internally to map a key ID to its corresponding
-  *         index in the button array initialized via `bits_button_init()`.
-  *
-  * @param  key_id: The unique identifier of the button to locate.
-  *
-  * @retval Index of the button in the array if found (0 to N-1), or -1 if the key ID is invalid.
-  */
-static int _get_btn_index_by_key_id(uint16_t key_id)
-{
-    bits_button_t *button = &bits_btn_entity;
-    for (size_t i = 0; i < button->btns_cnt; i++)
-    {
-        if (button->btns[i].key_id == key_id)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-static uint32_t get_button_tick(void)
-{
-    return bits_btn_entity.btn_tick;
-}
-
-#ifdef BITS_BTN_BUFFER_SIZE
 
 /**
   * @brief  Initialize the ring buffer for button results.
   * @retval None
   */
-static void bits_btn_init_buffer(void)
+static void bits_btn_init_buffer_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -67,7 +59,7 @@ static void bits_btn_init_buffer(void)
     atomic_init(&overwrite_count, 0);
 }
 
-bool bits_btn_is_buffer_empty(void)
+static uint8_t bits_btn_is_buffer_empty_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -76,7 +68,7 @@ bool bits_btn_is_buffer_empty(void)
     return current_read == current_write;
 }
 
-bool bits_btn_is_buffer_full(void)
+static uint8_t bits_btn_is_buffer_full_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -86,7 +78,7 @@ bool bits_btn_is_buffer_full(void)
     return next_write == current_read;
 }
 
-size_t get_bits_btn_buffer_count(void)
+static size_t get_bits_btn_buffer_used_count_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
     size_t current_write = atomic_load_explicit(&buf->write_idx, memory_order_relaxed);
@@ -102,11 +94,16 @@ size_t get_bits_btn_buffer_count(void)
     }
 }
 
+static size_t get_bits_btn_buffer_capacity_c11(void)
+{
+    return BITS_BTN_BUFFER_SIZE;
+}
+
 /**
   * @brief  Clear the ring buffer. Note that additional synchronization is required in a multi-threaded environment.
   * @retval None
   */
-void bits_btn_clear_buffer(void)
+static void bits_btn_clear_buffer_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -114,17 +111,17 @@ void bits_btn_clear_buffer(void)
     atomic_store_explicit(&buf->write_idx, 0, memory_order_relaxed);
 }
 
-size_t get_bits_btn_overwrite_count(void)
+static size_t get_bits_btn_buffer_overwrite_count_c11(void)
 {
     return atomic_load_explicit(&overwrite_count, memory_order_relaxed);
 }
-
+#if 0
 /**
   * @brief  Write a button result to the ring buffer.
   * @param  result: Pointer to the button result to be written.
   * @retval true if written successfully, false if the buffer is full.
   */
-bool bits_btn_write_buffer(bits_btn_result_t *result)
+static uint8_t bits_btn_write_buffer_c11(bits_btn_result_t *result)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -148,13 +145,14 @@ bool bits_btn_write_buffer(bits_btn_result_t *result)
     atomic_store_explicit(&buf->write_idx, next_write, memory_order_release);
     return true;
 }
+#endif
 
 /**
   * @brief  Write a button result to the ring buffer with overwrite in a single-writer scenario.
   * @param  result: Pointer to the button result to be written.
   * @retval true if written successfully.
   */
-static bool bits_btn_write_buffer_overwrite(bits_btn_result_t *result)
+static uint8_t bits_btn_write_buffer_overwrite_c11(bits_btn_result_t *result)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -187,7 +185,7 @@ static bool bits_btn_write_buffer_overwrite(bits_btn_result_t *result)
   * @param  result: Pointer to store the read button result.
   * @retval true if read successfully, false if the buffer is empty.
   */
-static bool bits_btn_read_buffer(bits_btn_result_t *result)
+static uint8_t bits_btn_read_buffer_c11(bits_btn_result_t *result)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
@@ -205,7 +203,107 @@ static bool bits_btn_read_buffer(bits_btn_result_t *result)
 
     return true;
 }
+
+const bits_btn_buffer_ops_t c11_buffer_ops = {
+    .init = bits_btn_init_buffer_c11,
+    .write = bits_btn_write_buffer_overwrite_c11,
+    .read = bits_btn_read_buffer_c11,
+    .is_empty = bits_btn_is_buffer_empty_c11,
+    .is_full = bits_btn_is_buffer_full_c11,
+    .get_buffer_used_count = get_bits_btn_buffer_used_count_c11,
+    .clear = bits_btn_clear_buffer_c11,
+    .get_buffer_overwrite_count = get_bits_btn_buffer_overwrite_count_c11,
+    .get_buffer_capacity = get_bits_btn_buffer_capacity_c11,
+};
+
+static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = &c11_buffer_ops;
+
 #endif
+
+/**
+  * @brief  Find the index of a button object by its key ID within the button array.
+  *         This is a helper function used internally to map a key ID to its corresponding
+  *         index in the button array initialized via `bits_button_init()`.
+  *
+  * @param  key_id: The unique identifier of the button to locate.
+  *
+  * @retval Index of the button in the array if found (0 to N-1), or -1 if the key ID is invalid.
+  */
+static int _get_btn_index_by_key_id(uint16_t key_id)
+{
+    bits_button_t *button = &bits_btn_entity;
+    for (size_t i = 0; i < button->btns_cnt; i++)
+    {
+        if (button->btns[i].key_id == key_id)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static uint32_t get_button_tick(void)
+{
+    return bits_btn_entity.btn_tick;
+}
+
+uint8_t bits_btn_is_buffer_empty(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->is_empty)
+    {
+        return bits_btn_buffer_ops->is_empty();
+    }
+    return true;
+}
+
+uint8_t bits_btn_is_buffer_full(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->is_full)
+    {
+        return bits_btn_buffer_ops->is_full();
+    }
+    return true;
+}
+
+size_t get_bits_btn_buffer_used_count(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->get_buffer_used_count)
+    {
+        return bits_btn_buffer_ops->get_buffer_used_count();
+    }
+    return 0;
+}
+
+/**
+  * @brief  Clear the ring buffer. Note that additional synchronization is required in a multi-threaded environment.
+  * @retval None
+  */
+void bits_btn_clear_buffer(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->clear)
+    {
+        bits_btn_buffer_ops->clear();
+    }
+}
+
+size_t get_bits_btn_buffer_overwrite_count(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->get_buffer_overwrite_count)
+    {
+        return bits_btn_buffer_ops->get_buffer_overwrite_count();
+    }
+    return 0;
+}
+
+size_t get_bits_btn_buffer_capacity(void)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->get_buffer_capacity)
+    {
+        return bits_btn_buffer_ops->get_buffer_capacity();
+    }
+    return 0;
+}
 
 /**
   * @brief  Sort combo buttons during initialization (descending by key count)
@@ -275,7 +373,7 @@ int32_t bits_button_init(button_obj_t* btns                                     
     bits_button_t *button = &bits_btn_entity;
     debug_printf = bis_btn_debug_printf;
 
-    if (btns == NULL|| read_button_level_func == NULL ||
+    if (btns == NULL || read_button_level_func == NULL ||
         (btns_combo_cnt > 0 && btns_combo == NULL))
     {
         if(debug_printf)
@@ -323,9 +421,19 @@ int32_t bits_button_init(button_obj_t* btns                                     
     // Sort the combination buttons during initialization.
     sort_combo_buttons_in_init(button);
 
-#ifdef BITS_BTN_BUFFER_SIZE
-    bits_btn_init_buffer();
+#ifdef BITS_BTN_USE_USER_BUFFER
+    if (bits_btn_buffer_ops == NULL)
+    {
+        if (debug_printf) debug_printf("Error: External buffer mode requires setting buffer ops!\n");
+        return -4;
+    }
 #endif
+
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->init)
+    {
+        bits_btn_buffer_ops->init();
+    }
+
     return 0;
 }
 
@@ -334,9 +442,13 @@ int32_t bits_button_init(button_obj_t* btns                                     
   * @param  result: Pointer to store the button key result
   * @retval true if read successfully, false if the buffer is empty.
   */
-bool bits_button_get_key_result(bits_btn_result_t *result)
+uint8_t bits_button_get_key_result(bits_btn_result_t *result)
 {
-    return bits_btn_read_buffer(result);
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->read)
+    {
+        return bits_btn_buffer_ops->read(result);
+    }
+    return false;
 }
 
 /**
@@ -348,10 +460,10 @@ bool bits_button_get_key_result(bits_btn_result_t *result)
 void bits_button_reset_states(void)
 {
     bits_button_t *button = &bits_btn_entity;
-    
+
     if (debug_printf)
         debug_printf("Resetting all button states\n");
-    
+
     // Reset all individual buttons
     for (size_t i = 0; i < button->btns_cnt; i++)
     {
@@ -361,7 +473,7 @@ void bits_button_reset_states(void)
         button->btns[i].state_entry_time = 0;
         button->btns[i].long_press_period_trigger_cnt = 0;
     }
-    
+
     // Reset all combo buttons
     if (button->btns_combo != NULL && button->btns_combo_cnt > 0)
     {
@@ -375,7 +487,7 @@ void bits_button_reset_states(void)
             combo->btn.long_press_period_trigger_cnt = 0;
         }
     }
-    
+
     // Reset global button state and force mask synchronization
     // This prevents spurious release events after reset
     button_mask_type_t current_physical_mask = 0;
@@ -387,15 +499,13 @@ void bits_button_reset_states(void)
             current_physical_mask |= ((button_mask_type_t)1UL << i);
         }
     }
-    
+
     button->current_mask = current_physical_mask;
     button->last_mask = current_physical_mask;
     button->state_entry_time = get_button_tick();
-    
-#ifdef BITS_BTN_BUFFER_SIZE
+
     // Clear the event buffer
     bits_btn_clear_buffer();
-#endif
 }
 
 /**
@@ -457,9 +567,11 @@ static void bits_btn_report_event(struct button_obj_t* button, bits_btn_result_t
         debug_printf("key id[%d],event:%d, long trigger_cnt:%d, key_value:", result->key_id, result->event ,result->long_press_period_trigger_cnt);
     debug_print_binary(result->key_value);
 
-#ifdef BITS_BTN_BUFFER_SIZE
-    if(result->event != BTN_STATE_RELEASE)
-        bits_btn_write_buffer_overwrite(result);
+#ifndef BITS_BTN_DISABLE_BUFFER
+    if(result->event != BTN_STATE_RELEASE && bits_btn_buffer_ops && bits_btn_buffer_ops->write)
+    {
+        bits_btn_buffer_ops->write(result);
+    }
 #endif
 
     if(btn_result_cb)
