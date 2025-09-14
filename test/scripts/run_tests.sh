@@ -111,6 +111,20 @@ if [ $TEST_RESULT -eq 0 ]; then
             rm -f "compile_error3.log"
         fi
     fi
+    
+    echo "测试编译指令4: g++ -std=c++11 -Wall -Wextra -I. test/cases/compat/test_cpp_compat.cpp"
+    if g++ -std=c++11 -Wall -Wextra -I. test/cases/compat/test_cpp_compat.cpp -o test_cpp_compat 2>compile_error4.log; then
+        echo "✅ C++兼容性 C++11 编译成功"
+        [ -f "test_cpp_compat" ] && rm -f "test_cpp_compat"
+        [ -f "compile_error4.log" ] && rm -f "compile_error4.log"
+    else
+        echo "❌ C++兼容性 C++11 编译失败"
+        echo "错误信息："
+        if [ -f "compile_error4.log" ]; then
+            cat "compile_error4.log"
+            rm -f "compile_error4.log"
+        fi
+    fi
 
     echo "✅ 编译配置兼容性验证完成！"
 

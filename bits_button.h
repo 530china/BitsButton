@@ -1,6 +1,10 @@
 #ifndef __BITS_BUTTON_H__
 #define __BITS_BUTTON_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "stdint.h"
 #include "stdio.h"
 
@@ -60,14 +64,17 @@ typedef enum {
 #define false 0
 #endif
 
-#define BITS_BUTTON_INIT(_key_id, _active_level, _param)                                                                                                    \
-{                                                                                                                                                           \
-    .key_id = _key_id, .active_level = _active_level, .param = _param,                                                                                      \
+#define BITS_BUTTON_INIT(_key_id, _active_level, _param)                                    \
+{                                                                                           \
+    .active_level = _active_level, .current_state = 0, .last_state = 0, .key_id = _key_id,  \
+    .long_press_period_trigger_cnt = 0, .state_entry_time = 0,                              \
+    .state_bits = 0, .param = _param                                                        \
 }
 
-#define BITS_BUTTON_COMBO_INIT(_key_id, _active_level, _param, _key_single_ids, _key_count, _single_key_suppress)                                           \
-{                                                                                                                                                           \
-    .key_single_ids = _key_single_ids, .key_count =  _key_count, .suppress = _single_key_suppress, .btn = BITS_BUTTON_INIT(_key_id, _active_level, _param)  \
+#define BITS_BUTTON_COMBO_INIT(_key_id, _active_level, _param, _key_single_ids, _key_count, _single_key_suppress)   \
+{                                                                                                                   \
+    .suppress = _single_key_suppress, .key_count = _key_count, .key_single_ids = _key_single_ids, .combo_mask = 0,  \
+    .btn = BITS_BUTTON_INIT(_key_id, _active_level, _param)                                                         \
 }
 
 typedef struct bits_btn_result
@@ -239,4 +246,9 @@ void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops);
   * @retval The total buffer capacity in number of elements. Returns 0 if buffer is disabled.
   */
 size_t get_bits_btn_buffer_capacity(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

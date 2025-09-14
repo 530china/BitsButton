@@ -168,6 +168,21 @@ if !test_result! equ 0 (
         )
     )
 
+    echo 测试编译指令4: g++ -std=c++11 -Wall -Wextra -I. test/cases/compat/test_cpp_compat.cpp
+    g++ -std=c++11 -Wall -Wextra -I. test/cases/compat/test_cpp_compat.cpp -o test_cpp_compat.exe 2>compile_error4.log
+    if !errorlevel! equ 0 (
+        echo ✅ C++兼容性 C++11 编译成功
+        if exist "test_cpp_compat.exe" del "test_cpp_compat.exe" 2>nul
+        if exist "compile_error4.log" del "compile_error4.log" 2>nul
+    ) else (
+        echo ❌ C++兼容性 C++11 编译失败
+        echo 错误信息：
+        if exist "compile_error4.log" (
+            type "compile_error4.log"
+            del "compile_error4.log" 2>nul
+        )
+    )
+
     echo ✅ 编译配置兼容性验证完成！
 
     REM 返回到构建目录
