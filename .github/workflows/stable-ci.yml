@@ -2,7 +2,7 @@ name: BitsButton 稳定CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, ci_test]
   pull_request:
     branches: [ main, master ]
 
@@ -10,7 +10,7 @@ jobs:
   test:
     name: 稳定测试 (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -21,11 +21,11 @@ jobs:
             compiler: clang
           - os: macos-latest
             compiler: gcc
-    
+
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
-    
+
     - name: 设置构建环境 (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -34,12 +34,15 @@ jobs:
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt-get install -y clang
         fi
-    
+        # 确保C++编译器安装
+        sudo apt-get install -y g++
+
     - name: 设置构建环境 (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         brew install cmake
-    
+        # macOS默认已有clang++，无需另行安装
+
     - name: 设置构建环境 (Windows)
       if: matrix.os == 'windows-latest'
       uses: msys2/setup-msys2@v2
@@ -49,7 +52,8 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-make
-    
+          mingw-w64-x86_64-toolchain
+
     - name: 配置编译器环境变量 (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
@@ -61,28 +65,32 @@ jobs:
           echo "CXX=g++" >> $GITHUB_ENV
         fi
       shell: bash
-    
+
     - name: 运行测试 (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
         cd test
-        mkdir -p build
-        cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ..
-        make -j$(nproc 2>/dev/null || echo 4)
-        ./run_tests_new
-    
+        chmod +x scripts/run_tests.sh
+        scripts/run_tests.sh
+
     - name: 运行测试 (Windows)
       if: matrix.os == 'windows-latest'
-      shell: msys2 {0}
+      shell: cmd
       run: |
+        REM 设置MSYS2环境变量
+        set "PATH=C:\msys64\mingw64\bin;%PATH%"
+        set CC=gcc
+        set CXX=g++
+
+        REM 检查编译器是否可用
+        echo 检查编译器...
+        gcc --version
+        g++ --version
+
+        REM 运行测试
         cd test
-        mkdir -p build
-        cd build
-        cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-        mingw32-make -j4
-        ./run_tests_new.exe
-    
+        scripts\run_tests.bat
+
     - name: 上传测试结果
       uses: actions/upload-artifact@v4
       if: always()
@@ -96,16 +104,16 @@ jobs:
   basic-quality:
     name: 基础质量检查
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
-    
+
     - name: 安装工具
       run: |
         sudo apt-get update
         sudo apt-get install -y cppcheck
-    
+
     - name: 运行基础静态分析
       run: |
         # 只检查严重错误，忽略风格问题
