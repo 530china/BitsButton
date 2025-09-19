@@ -6,6 +6,7 @@ import queue
 import threading
 import os
 import sys
+import time
 from pynput import keyboard
 
 class LogWindowHandler(logging.Handler):
@@ -214,16 +215,84 @@ class DynamicKeySimulator:
         self.log_area.pack(fill=tk.BOTH, expand=True)
 
     def _start_keyboard_listener(self):
-        """启动非阻塞式键盘监听"""
+        """启动非阻塞式键盘监听，使用通用的错误处理策略"""
         def _on_event(event_type, key):
-            self.event_queue.put((event_type, key))
+            try:
+                self.event_queue.put((event_type, key))
+            except Exception as e:
+                logging.debug(f"事件队列异常: {str(e)}")
+        
+        def _safe_event_handler(handler_name):
+            """创建安全的事件处理器包装器"""
+            def wrapper(key):
+                try:
+                    _on_event(handler_name, key)
+                except Exception as e:
+                    # 忽略所有事件处理异常，防止程序崩溃
+                    logging.debug(f"{handler_name}事件处理异常: {str(e)}")
+            return wrapper
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                self.listener = keyboard.Listener(
+                    on_press=_safe_event_handler('press'),
+                    on_release=_safe_event_handler('release')
+                )
+                self.listener.daemon = True
+                self.listener.start()
+                logging.info("键盘监听器启动成功")
+                return  # 成功返回
+                
+            except Exception as e:
+                error_msg = str(e).lower()
+                if attempt < max_retries - 1:
+                    logging.warning(f"键盘监听器启动失败，重试 ({attempt + 1}/{max_retries}): {str(e)}")
+                    time.sleep(1)  # 稍等片刻再重试
+                else:
+                    # 最后一次尝试失败，显示用户友好的错误信息
+                    if "trusted" in error_msg or "accessibility" in error_msg:
+                        self._show_permission_error()
+                    else:
+                        self._show_generic_error(str(e))
+    
+    def _show_permission_error(self):
+        """显示权限错误对话框"""
+        error_msg = """🔒 需要辅助功能权限
 
-        self.listener = keyboard.Listener(
-            on_press=lambda k: _on_event('press', k),
-            on_release=lambda k: _on_event('release', k)
+为了监听键盘事件，需要给应用程序授予辅助功能权限。
+
+请按以下步骤操作：
+1. 打开 系统设置
+2. 进入 隐私与安全 > 辅助功能
+3. 点击左下角的锁图标解锁
+4. 添加以下应用：
+   - Terminal.app
+   - Python.app (如果存在)
+   - 或者你正在使用的终端应用
+
+设置完成后，请重新启动模拟器。
+
+点击“确定”打开系统设置页面。"""
+        
+        result = messagebox.askokcancel("权限请求", error_msg)
+        if result:
+            try:
+                import subprocess
+                subprocess.run([
+                    "open", 
+                    "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                ])
+            except Exception as e:
+                logging.error(f"无法打开设置页面: {str(e)}")
+    
+    def _show_generic_error(self, error_msg):
+        """显示通用错误对话框"""
+        messagebox.showerror(
+            "键盘监听器错误",
+            f"键盘监听器启动失败：\n\n{error_msg}\n\n"
+            f"请尝试重新启动模拟器或检查系统权限。"
         )
-        self.listener.daemon = True
-        self.listener.start()
 
     def _start_event_processor(self):
         """启动事件处理线程"""
@@ -235,7 +304,17 @@ class DynamicKeySimulator:
                 except queue.Empty:
                     continue
                 except Exception as e:
-                    logging.error(f"事件处理异常: {str(e)}")
+                    # 使用通用的异常处理，不依赖特定错误信息
+                    error_msg = str(e).lower()
+                    if any(keyword in error_msg for keyword in [
+                        'not callable', 'threadhandle', 'mach_port', 
+                        'compatibility', 'version'
+                    ]):
+                        # 这些都是兼容性问题，记录但不中断程序
+                        logging.debug(f"检测到兼容性问题，忽略: {str(e)}")
+                    else:
+                        logging.warning(f"事件处理异常: {str(e)}")
+                    # 继续循环，不中断程序
 
         self.process_thread = threading.Thread(target=_processor)
         self.process_thread.daemon = True
