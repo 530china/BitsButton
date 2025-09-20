@@ -132,6 +132,16 @@ __attribute__((constructor)) static void init_adapter() {
 
 }
 
+void get_bits_btn_result_from_buffer_test(void)
+{
+    bits_btn_result_t result = {0};
+    int32_t res = bits_button_get_key_result(&result);
+
+    if(res == true)
+    {
+        printf("[buffer_example]:id:%d, event:%d, key_value:%d, long press period trigger cnt:%d \r\n", result.key_id, result.event, result.key_value, result.long_press_period_trigger_cnt);
+    }
+}
 // 导出函数实现
 void BUTTON_API set_key_state(uint8_t button_id, uint8_t state) {
     if(button_id < MAX_BUTTONS) key_states[button_id] = state;
@@ -140,4 +150,5 @@ void BUTTON_API set_key_state(uint8_t button_id, uint8_t state) {
 void BUTTON_API button_ticks_wrapper() {
 
     bits_button_ticks();
+    get_bits_btn_result_from_buffer_test();
 }
