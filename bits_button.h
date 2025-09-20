@@ -107,6 +107,7 @@ typedef struct button_obj_t {
 typedef uint8_t (*bits_btn_read_button_level)(struct button_obj_t *btn);
 typedef void (*bits_btn_result_callback)(struct button_obj_t *btn, struct bits_btn_result button_result);
 typedef int (*bits_btn_debug_printf_func)(const char*, ...);
+typedef uint8_t (*bits_btn_result_user_filter_callback)(bits_btn_result_t button_result);
 
 typedef struct button_obj_combo
 {
@@ -246,6 +247,16 @@ void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops);
   * @retval The total buffer capacity in number of elements. Returns 0 if buffer is disabled.
   */
 size_t get_bits_btn_buffer_capacity(void);
+
+/**
+  * @brief  Register a custom filter callback for button result events.
+  *         This function allows users to control which button events are written to the buffer.
+  * @param  cb: Pointer to the user-defined filter callback function. The callback should
+  *            return 1 to write the event to buffer, 0 to filter it out. Pass NULL to disable.
+  * @retval None
+  * @note   Only available in buffer mode. Default behavior writes BTN_STATE_LONG_PRESS and BTN_STATE_FINISH events.
+  */
+void bits_btn_register_result_filter_callback(bits_btn_result_user_filter_callback cb);
 
 #ifdef __cplusplus
 }

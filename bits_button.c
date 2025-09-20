@@ -220,6 +220,18 @@ static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = &c11_buffer_ops;
 
 #endif
 
+#ifndef BITS_BTN_DISABLE_BUFFER
+static bits_btn_result_user_filter_callback bits_btn_result_user_filter_cb = NULL;
+
+void bits_btn_register_result_filter_callback(bits_btn_result_user_filter_callback cb)
+{
+    if(cb != NULL)
+    {
+        bits_btn_result_user_filter_cb = cb;
+    }
+}
+#endif
+
 /**
   * @brief  Find the index of a button object by its key ID within the button array.
   *         This is a helper function used internally to map a key ID to its corresponding
@@ -568,9 +580,26 @@ static void bits_btn_report_event(struct button_obj_t* button, bits_btn_result_t
     debug_print_binary(result->key_value);
 
 #ifndef BITS_BTN_DISABLE_BUFFER
-    if(result->event != BTN_STATE_RELEASE && bits_btn_buffer_ops && bits_btn_buffer_ops->write)
+    uint8_t is_user_result_filter_exist = (bits_btn_result_user_filter_cb != NULL);
+    uint8_t default_result_filter_triger = (result->event == BTN_STATE_LONG_PRESS) || (result->event == BTN_STATE_FINISH);
+
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->write)
     {
-        bits_btn_buffer_ops->write(result);
+        uint8_t should_write_to_buffer = 0;
+
+        if (is_user_result_filter_exist)
+        {
+            should_write_to_buffer = bits_btn_result_user_filter_cb(*result);
+        }
+        else
+        {
+            should_write_to_buffer = default_result_filter_triger;
+        }
+
+        if (should_write_to_buffer)
+        {
+            bits_btn_buffer_ops->write(result);
+        }
     }
 #endif
 
