@@ -204,6 +204,27 @@ static uint8_t bits_btn_read_buffer_c11(bits_btn_result_t *result)
     return true;
 }
 
+/**
+ * @brief  Peek a button result from the ring buffer without removing it.
+ * @param  result: Pointer to store the peeked button result.
+ * @retval true if peek successfully, false if the buffer is empty.
+ */
+static uint8_t bits_btn_peek_buffer_c11(bits_btn_result_t *result)
+{
+    bits_btn_ring_buffer_t *buf = &ring_buffer;
+
+    size_t current_write = atomic_load_explicit(&buf->write_idx, memory_order_acquire);
+    size_t current_read = atomic_load_explicit(&buf->read_idx, memory_order_relaxed);
+
+    if (current_read == current_write) {  // Buffer is empty
+        return false;
+    }
+
+    *result = buf->buffer[current_read];  // Read without moving the read pointer
+
+    return true;
+}
+
 const bits_btn_buffer_ops_t c11_buffer_ops = {
     .init = bits_btn_init_buffer_c11,
     .write = bits_btn_write_buffer_overwrite_c11,
@@ -214,6 +235,7 @@ const bits_btn_buffer_ops_t c11_buffer_ops = {
     .clear = bits_btn_clear_buffer_c11,
     .get_buffer_overwrite_count = get_bits_btn_buffer_overwrite_count_c11,
     .get_buffer_capacity = get_bits_btn_buffer_capacity_c11,
+    .peek = bits_btn_peek_buffer_c11,  // Add peek function to the structure
 };
 
 static const bits_btn_buffer_ops_t *bits_btn_buffer_ops = &c11_buffer_ops;
@@ -459,6 +481,20 @@ uint8_t bits_button_get_key_result(bits_btn_result_t *result)
     if (bits_btn_buffer_ops && bits_btn_buffer_ops->read)
     {
         return bits_btn_buffer_ops->read(result);
+    }
+    return false;
+}
+
+/**
+ * @brief  Peek the button key result from the buffer without removing it.
+ * @param  result: Pointer to store the button key result
+ * @retval true(1) if peek successfully, false if the buffer is empty.
+ */
+uint8_t bits_button_peek_key_result(bits_btn_result_t *result)
+{
+    if (bits_btn_buffer_ops && bits_btn_buffer_ops->peek)
+    {
+        return bits_btn_buffer_ops->peek(result);
     }
     return false;
 }

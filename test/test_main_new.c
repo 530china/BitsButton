@@ -62,6 +62,11 @@ extern void test_custom_parameters(void);
 extern void test_multiple_button_initialization(void);
 extern void test_callback_functions(void);
 
+// Peek功能测试
+extern void test_peek_functionality(void);
+extern void test_peek_vs_get_behavior(void);
+extern void test_peek_disabled_buffer_mode(void);
+
 // ==================== 测试套件设置函数 ====================
 
 void basic_tests_setup(void) {
@@ -176,6 +181,11 @@ int main(void) {
     RUN_TEST(test_custom_parameters);
     RUN_TEST(test_multiple_button_initialization);
     RUN_TEST(test_callback_functions);
+
+    printf("\n【Peek功能测试】\n");
+    RUN_TEST(test_peek_functionality);
+    RUN_TEST(test_peek_vs_get_behavior);
+    RUN_TEST(test_peek_disabled_buffer_mode);
 
     printf("\n========================================\n");
     printf("           测试完成\n");
