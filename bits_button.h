@@ -148,6 +148,7 @@ typedef struct
     void (*clear)(void);
     size_t (*get_buffer_overwrite_count)(void);
     size_t (*get_buffer_capacity)(void);
+    uint8_t (*peek)(bits_btn_result_t *result);
 } bits_btn_buffer_ops_t;
 
 /**
@@ -195,7 +196,14 @@ void bits_button_ticks(void);
   * @param  result: Pointer to store the button key result
   * @retval true(1) if read successfully, false if the buffer is empty.
   */
- uint8_t bits_button_get_key_result(bits_btn_result_t *result);
+uint8_t bits_button_get_key_result(bits_btn_result_t *result);
+
+/**
+ * @brief  Peek the button key result from the buffer without removing it.
+ * @param  result: Pointer to store the button key result
+ * @retval true(1) if peek successfully, false if the buffer is empty.
+ */
+uint8_t bits_button_peek_key_result(bits_btn_result_t *result);
 
 /**
   * @brief  Reset all button states to idle.
