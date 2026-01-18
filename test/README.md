@@ -1,29 +1,27 @@
-# BitsButton 测试框架 v3.0
-
-## 概述
-
-BitsButton测试框架是一个分层架构的C语言测试系统，专门为BitsButton按键库设计。框架采用模块化设计，提供全面的测试覆盖和详细的测试报告。
-
-## 测试结果
-
-✅ **所有测试通过！** (37/37)
-- 测试成功率：100%
-- 覆盖范围：完整的功能、边界、性能和错误处理测试
+# 测试框架技术实现文档
 
 ## 架构设计
+
+BitsButton测试框架是一个分层架构的C语言测试系统，专门为BitsButton按键库设计。框架采用模块化设计，提供全面的测试覆盖和详细的测试报告。
 
 ### 分层结构
 ```
 test/
-├── core/           # 核心测试框架
-├── utils/          # 测试工具库
-├── cases/          # 测试用例
-│   ├── basic/      # 基础功能测试
-│   ├── combo/      # 组合按键测试
-│   ├── edge/       # 边界条件测试
-│   └── performance/# 性能测试
-├── config/         # 测试配置
-└── scripts/        # 构建脚本
+├── Unity/                 # Unity测试框架
+├── core/                  # 测试框架核心
+│   ├── test_framework.h/c # 测试框架基础设施
+│   └── test_runner.h/c    # 测试运行器和报告生成
+├── utils/                 # 测试工具库
+│   ├── mock_utils.h/c     # 模拟工具
+│   ├── time_utils.h/c     # 时间工具
+│   └── assert_utils.h/c   # 断言工具
+├── cases/                 # 测试用例
+│   ├── basic/             # 基础功能测试
+│   ├── combo/             # 组合按键测试
+│   ├── edge/              # 边界条件测试
+│   └── performance/       # 性能测试
+├── config/                # 测试配置
+└── scripts/               # 构建脚本
 ```
 
 ### 核心组件
@@ -98,7 +96,7 @@ test/
 2. **test_different_active_levels** - 不同激活电平测试
 3. **test_custom_parameters** - 自定义参数测试
 4. **test_multiple_button_initialization** - 多按键初始化测试
-5. **test_callback_functions** - 回调函数测试
+
 
 ## 新增功能：低功耗状态重置
 
@@ -215,5 +213,12 @@ make
 - 使用 `printf` 调试输出查看中间状态
 - 检查事件缓冲区状态
 - 验证时序参数设置
+
+## 用户指南参考
+
+如需了解测试框架的基本使用方法和应用场景，请参阅主项目的用户文档：
+
+- [测试框架使用指南](../docs/testing.md)
+- [使用指南](../docs/usage_guide.md)
 
 ---

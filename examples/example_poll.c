@@ -87,9 +87,9 @@ int main()
         printf("bits button init failed, ret:%d \r\n", ret);
     }
 
-    //make the timer invoking the button_ticks() interval 5ms.
-    //This function is implemented by yourself.
-    // 6. 5ms周期性调用bits_button_ticks()
+    // 使定时器以5ms为间隔调用button_ticks()函数。
+    // 此函数需要用户自己实现定时器调用逻辑。
+    // 6. 5ms周期性调用bits_button_ticks() - 这是按键检测的核心，确保能够及时响应按键事件
     __timer_start(bits_button_ticks, 0, 5);
 
     while(1)
