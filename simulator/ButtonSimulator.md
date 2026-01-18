@@ -1,7 +1,7 @@
-# BitsButton 按键模拟器
+# 按键模拟器技术实现文档
 
-## 简介
-BitsButton 按键模拟器是一个跨平台的按键模拟工具，支持硬件和软件两种模式。该工具提供了直观的图形界面，允许用户配置按键绑定、监控按键状态并记录操作日志
+## 技术架构
+按键模拟器采用Python实现，通过C语言适配层与BitsButton库交互。该模块实现了跨平台的按键模拟功能，支持软件模式和硬件模式双模式运行。
 
 ## 目录结构
 
@@ -27,57 +27,47 @@ simulator/
 └── ButtonSimulator.md       # 本文档
 ```
 
-## 主要特性
+## 核心组件
 
-- ​跨平台支持​​：Windows,Linux 和 macOS
-- 双模式运行​​：
-    - ​硬件模式​​：通过动态库与底层硬件交互
-    - ​软件模式​​：纯软件模拟按键行为
-- 动态配置​​：实时修改按键绑定并保存配置
-- ​状态监控​​：实时显示按键状态（按下/释放）
-- ​详细日志​​：记录所有按键操作和系统事件
-- ​线程安全设计​​：确保高性能和稳定性
+- **Python GUI界面**：使用tkinter实现的跨平台图形界面
+- **C语言适配层**：通过adapter_layer实现与BitsButton库的交互
+- **双模式支持**：
+    - **软件模式**：纯Python模拟实现
+    - **硬件模式**：通过动态库与底层交互
+- **配置管理系统**：JSON格式的按键绑定配置
+- **日志系统**：详细的操作事件记录
 
 
-## 快速启动
-### 1. 安装准备
-确保已安装 Python 3.6 或更高版本
+## 技术部署
+
+### 环境要求
+
+- Python 3.6+ 运行时环境
+- tkinter GUI库（Python内置，但某些Linux发行版需单独安装）
+- 编译工具链（硬件模式）：
+  - Windows: MinGW
+  - Linux: GCC
+  - macOS: Xcode Command Line Tools
+
+### 架构实现
+
 ```bash
-# 查看Python版本
-python --version  # Windows/Linux/macOS通用
-python3 --version # Linux/macOS备选
-```
-
-### 2. 运行模拟器
-
-```bash
-# 进入模拟器目录
+# 项目结构
 cd BitsButton/simulator
 
-# 🚀 快速启动（推荐）
-python run.py                   # 软件模式（所有平台）
-python run.py --mode hardware   # 硬件模式
+# 主要运行方式
+python run.py                   # 软件模式运行
+python run.py --mode hardware   # 硬件模式运行
 
-# 🔧 环境问题解决
-python run.py --fix-env         # 自动修复环境问题（如macOS上的tkinter问题）
-python run.py --install-compiler # 安装编译器
-python run.py --help            # 查看所有选项
-
-# Linux/macOS备选命令（若python指向Python 2）
-python3 run.py                  # 软件模式
-python3 run.py --mode hardware  # 硬件模式
-python3 run.py --fix-env        # 修复环境问题
+# 环境配置选项
+python run.py --fix-env         # 自动修复环境依赖
+python run.py --install-compiler # 安装编译工具
+python run.py --help            # 查看命令行选项
 ```
 
-> 💡 **智能环境检测**：脚本会自动检测并修复常见的环境问题，如macOS上的tkinter缺失等。
+### 组件交互
 
-### 3. 界面操作
-
-1. **​修改按键绑定**​​：
-- 在输入框中输入新按键（单字母）
-- 点击"更新"保存
-2. **使用按键​**​：按下配置键观察状态变化
-3. **查看日志**​​：操作记录实时显示在下方面板
+软件模式下，Python模拟器通过适配层与C库交互，实现按键状态模拟和事件回调。硬件模式下，通过动态库与底层硬件通信。
 
 ## 常见问题解决
 
@@ -182,6 +172,15 @@ python run.py --fix-env
 - btn_number：硬件按钮编号（硬件模式使用）
 
 > 提示：修改配置文件后需重启应用生效
+
+## 用户指南参考
+
+如需了解模拟器的基本使用方法和应用场景，请参阅主项目的用户文档：
+
+- [使用指南](../docs/usage_guide.md)
+- [模拟器使用文档](../docs/simulator.md)
+
+---
 
 效果图如下：
 UI如下图：
