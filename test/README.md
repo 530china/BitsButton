@@ -131,7 +131,7 @@ void exit_low_power_mode(void) {
 
 BitsButton库使用位模式编码按键值：
 - **单击**: `0b010` (0x2)
-- **双击**: `0b01010` (0xA) 
+- **双击**: `0b01010` (0xA)
 - **三连击**: `0b101010` (0x2A)
 - **四连击**: `0b10101010` (0xAA)
 - **五连击**: `0b1010101010` (0x2AA)
@@ -146,13 +146,14 @@ BitsButton库使用位模式编码按键值：
 # Windows
 .\run_tests.bat
 
-# Linux/macOS  
+# Linux/macOS
 ./test/scripts/run_tests.sh
 ```
 
 ### 清理重建
-```bash
-.\run_tests.bat clean
+```
+.\run_tests.bat clean        # Windows
+# Linux/macOS不支持clean参数，直接重新运行即可
 ```
 
 ### 手动构建
@@ -214,7 +215,7 @@ make
 - 检查事件缓冲区状态
 - 验证时序参数设置
 
-## 用户指南参考
+## 用户使用参考
 
 如需了解测试框架的基本使用方法和应用场景，请参阅主项目的用户文档：
 
