@@ -40,7 +40,8 @@ git clone https://github.com/530china/BitsButton.git
 cd BitsButton
 
 # 运行自动化测试用例
-./run_tests.bat  # Windows
+./run_tests.bat              # Windows
+./test/scripts/run_tests.sh  # Linux/macOS
 ```
 
 
