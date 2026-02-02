@@ -1,5 +1,5 @@
 #include "bits_button.h"
-#include "string.h"
+#include <string.h>
 
 static bits_button_t bits_btn_entity;
 static bits_btn_debug_printf_func debug_printf = NULL;
@@ -96,7 +96,9 @@ static size_t get_bits_btn_buffer_used_count_c11(void)
 
 static size_t get_bits_btn_buffer_capacity_c11(void)
 {
-    return BITS_BTN_BUFFER_SIZE;
+    // A circular buffer needs to reserve 1 empty slot to distinguish between full and empty states,
+    // so the actual available capacity is SIZE - 1.
+    return BITS_BTN_BUFFER_SIZE - 1;
 }
 
 /**
@@ -107,8 +109,8 @@ static void bits_btn_clear_buffer_c11(void)
 {
     bits_btn_ring_buffer_t *buf = &ring_buffer;
 
-    atomic_store_explicit(&buf->read_idx, 0, memory_order_relaxed);
-    atomic_store_explicit(&buf->write_idx, 0, memory_order_relaxed);
+    atomic_store_explicit(&buf->write_idx, 0, memory_order_release);
+    atomic_store_explicit(&buf->read_idx, 0, memory_order_release);
 }
 
 static size_t get_bits_btn_buffer_overwrite_count_c11(void)
@@ -161,11 +163,8 @@ static uint8_t bits_btn_write_buffer_overwrite_c11(bits_btn_result_t *result)
     // Get the current write position
     size_t current_write = atomic_load_explicit(&buf->write_idx, memory_order_relaxed);
     size_t next_write = (current_write + 1) % BITS_BTN_BUFFER_SIZE;
+    size_t current_read = atomic_load_explicit(&buf->read_idx, memory_order_acquire);
 
-    // Get the current read position (ensure the latest value is seen)
-    size_t current_read = atomic_load_explicit(&buf->read_idx, memory_order_consume);
-
-    buf->buffer[current_write] = *result;
 
     // Advance the read pointer when the buffer is full
     if (next_write == current_read) {
@@ -173,7 +172,11 @@ static uint8_t bits_btn_write_buffer_overwrite_c11(bits_btn_result_t *result)
         size_t new_read = (current_read + 1) % BITS_BTN_BUFFER_SIZE;
 
         atomic_store_explicit(&buf->read_idx, new_read, memory_order_release);
+        current_read = new_read;
     }
+
+    // Write data (space is guaranteed to be safe at this point)
+    buf->buffer[current_write] = *result;
 
     // Update the write pointer (ensure data is visible before index update)
     atomic_store_explicit(&buf->write_idx, next_write, memory_order_release);
@@ -407,12 +410,21 @@ int32_t bits_button_init(button_obj_t* btns                                     
     bits_button_t *button = &bits_btn_entity;
     debug_printf = bis_btn_debug_printf;
 
-    if (btns == NULL || read_button_level_func == NULL ||
-        (btns_combo_cnt > 0 && btns_combo == NULL))
+    if ((btns == NULL)
+    || (btns_cnt == 0)
+    || (read_button_level_func == NULL)
+    || (btns_combo_cnt > 0 && btns_combo == NULL))
     {
         if(debug_printf)
             debug_printf("Invalid init parameters !\n");
         return -2;
+    }
+
+    if (btns_cnt > BITS_BTN_MAX_BUTTONS)
+    {
+        if (debug_printf)
+            debug_printf("Error: Too many buttons (%d > max %d)\n", btns_cnt, (int)BITS_BTN_MAX_BUTTONS);
+        return -5;
     }
 
     memset(button, 0, sizeof(bits_button_t));
@@ -432,6 +444,28 @@ int32_t bits_button_init(button_obj_t* btns                                     
                          btns_combo_cnt, BITS_BTN_MAX_COMBO_BUTTONS);
         }
         return -3;
+    }
+
+    // Check single button param pointers
+    for (uint16_t i = 0; i < btns_cnt; i++)
+    {
+        if (btns[i].param == NULL)
+        {
+            if (debug_printf)
+                debug_printf("Error: Button[%d] param is NULL\n", i);
+            return -6;
+        }
+    }
+
+    // Check combo button param pointers
+    for (uint16_t i = 0; i < btns_combo_cnt; i++)
+    {
+        if (btns_combo[i].btn.param == NULL)
+        {
+            if (debug_printf)
+                debug_printf("Error: Combo button[%d] param is NULL\n", i);
+            return -7;
+        }
     }
 
     for(uint16_t i = 0; i < btns_combo_cnt; i++)

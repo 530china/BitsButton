@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "stdint.h"
-#include "stdio.h"
+#include <stdint.h>
+#include <stdio.h>
 
 #ifndef BITS_BTN_MAX_COMBO_BUTTONS
 #define BITS_BTN_MAX_COMBO_BUTTONS  8 // 默认最大支持8个组合按钮
@@ -15,6 +15,9 @@ extern "C" {
 typedef uint32_t key_value_type_t;
 typedef uint32_t state_bits_type_t;
 typedef state_bits_type_t button_mask_type_t;
+
+// Maximum number of buttons based on mask type size
+#define BITS_BTN_MAX_BUTTONS      (sizeof(button_mask_type_t) * 8)
 
 
 typedef enum {
@@ -169,12 +172,16 @@ typedef struct
   *                           This function is called when a button event (press, release, etc.) is detected.
   * @param  bis_btn_debug_printf: Function pointer for debug logging. Pass NULL if debug output is not needed.
   *
-  * @retval Status code indicating the result of the initialization:
+* @retval Status code indicating the result of the initialization:
   *         - 0: Success. All parameters are valid, and the button system is initialized.
   *         - -1: Invalid key ID in combination button configuration. A key ID specified in a
   *               combination button configuration does not exist in the single button array.
   *         - -2: Invalid input parameters. Returned if either `btns` or `read_button_level_func` is NULL.
-  *         - -3: Too many combo buttons. The number of combo buttons exceeds the maximum allowed.
+  *         - -3: Too many combo buttons. The number of combo buttons exceeds BITS_BTN_MAX_COMBO_BUTTONS.
+  *         - -4: User buffer mode requires setting buffer ops before init.
+  *         - -5: Too many buttons. The number of buttons exceeds BITS_BTN_MAX_BUTTONS.
+  *         - -6: Button param is NULL. A single button has NULL param pointer.
+  *         - -7: Combo button param is NULL. A combo button has NULL param pointer.
   */
 int32_t bits_button_init(button_obj_t* btns                                     , \
                          uint16_t btns_cnt                                      , \
@@ -237,6 +244,7 @@ uint8_t bits_btn_is_buffer_full(void);
   */
 uint8_t bits_btn_is_buffer_empty(void);
 
+#ifdef BITS_BTN_USE_USER_BUFFER
 /**
   * @brief  Set custom buffer operations for external buffer management.
   *         This function allows users to register their own buffer implementation
@@ -245,14 +253,19 @@ uint8_t bits_btn_is_buffer_empty(void);
   *                         Pass NULL to restore default buffer operations.
   * @retval None
   * @note   This function should be called before bits_button_init().
+  *         Only available when BITS_BTN_USE_USER_BUFFER is defined.
   */
 void bits_button_set_buffer_ops(const bits_btn_buffer_ops_t *user_buffer_ops);
+#endif
 
 /**
-  * @brief  Get the total capacity of the button result buffer.
+  * @brief  Get the usable capacity of the button result buffer.
   *         This function returns the maximum number of button events that
   *         can be stored in the buffer.
-  * @retval The total buffer capacity in number of elements. Returns 0 if buffer is disabled.
+  * @note   The underlying array size is capacity + 1 due to ring buffer
+  *         implementation requirements (one slot reserved to distinguish
+  *         full/empty states).
+  * @retval The usable buffer capacity in number of elements. Returns 0 if buffer is disabled.
   */
 size_t get_bits_btn_buffer_capacity(void);
 

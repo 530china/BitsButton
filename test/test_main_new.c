@@ -37,6 +37,9 @@ extern void test_memory_usage(void);
 extern void test_buffer_overflow_protection(void);
 extern void test_buffer_state_tracking(void);
 extern void test_buffer_edge_cases(void);
+extern void test_buffer_overwrite_data_correctness(void);
+extern void test_buffer_overwrite_multiple_cycles(void);
+extern void test_buffer_overwrite_count_accuracy(void);
 
 // 高级组合按键测试
 extern void test_advanced_three_key_combo(void);
@@ -54,6 +57,10 @@ extern void test_null_pointer_handling(void);
 extern void test_invalid_parameters(void);
 extern void test_boundary_values(void);
 extern void test_resource_exhaustion(void);
+extern void test_max_buttons_boundary(void);
+extern void test_too_many_buttons(void);
+extern void test_button_param_null(void);
+extern void test_combo_button_param_null(void);
 
 // 初始化测试
 extern void test_successful_initialization(void);
@@ -157,6 +164,9 @@ int main(void) {
     RUN_TEST(test_buffer_overflow_protection);
     RUN_TEST(test_buffer_state_tracking);
     RUN_TEST(test_buffer_edge_cases);
+    RUN_TEST(test_buffer_overwrite_data_correctness);
+    RUN_TEST(test_buffer_overwrite_multiple_cycles);
+    RUN_TEST(test_buffer_overwrite_count_accuracy);
 
     printf("\n【高级组合按键测试】\n");
     RUN_TEST(test_advanced_three_key_combo);
@@ -174,6 +184,10 @@ int main(void) {
     RUN_TEST(test_invalid_parameters);
     RUN_TEST(test_boundary_values);
     RUN_TEST(test_resource_exhaustion);
+    RUN_TEST(test_max_buttons_boundary);
+    RUN_TEST(test_too_many_buttons);
+    RUN_TEST(test_button_param_null);
+    RUN_TEST(test_combo_button_param_null);
 
     printf("\n【初始化配置测试】\n");
     RUN_TEST(test_successful_initialization);
