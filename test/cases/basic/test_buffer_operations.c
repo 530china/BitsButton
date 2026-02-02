@@ -204,3 +204,145 @@ void test_buffer_edge_cases(void) {
 
     printf("缓冲区边界情况测试通过\n");
 }
+
+// ==================== 覆写功能测试 ====================
+
+void test_buffer_overwrite_data_correctness(void) {
+    printf("\n=== 测试覆写后数据正确性 ===\n");
+    
+    // 使用多个按键产生可区分的事件
+    static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
+    button_obj_t buttons[10];
+    for (int i = 0; i < 10; i++) {
+        buttons[i] = (button_obj_t)BITS_BUTTON_INIT(i + 1, 1, &param);
+    }
+    
+    bits_button_init(buttons, 10, NULL, 0,
+                     test_framework_mock_read_button,
+                     test_framework_event_callback,
+                     test_framework_log_printf);
+    
+    size_t capacity = get_bits_btn_buffer_capacity();
+    
+    // 填满缓冲区：使用 key_id 1 产生 capacity 个事件
+    for (size_t i = 0; i < capacity; i++) {
+        mock_button_click(1, STANDARD_CLICK_TIME_MS);
+        time_simulate_time_window_end();
+        bits_button_ticks();
+    }
+    
+    // 再写入 3 个新事件，使用 key_id 2 区分
+    for (int i = 0; i < 3; i++) {
+        mock_button_click(2, STANDARD_CLICK_TIME_MS);
+        time_simulate_time_window_end();
+        bits_button_ticks();
+    }
+    
+    // 读取所有事件，验证最旧的被覆盖
+    bits_btn_result_t result;
+    size_t key1_count = 0;
+    size_t key2_count = 0;
+    
+    while (bits_button_get_key_result(&result)) {
+        if (result.key_id == 1) key1_count++;
+        else if (result.key_id == 2) key2_count++;
+    }
+    
+    // 验证：key_id=2 的事件应该有 3 个（最新写入的）
+    TEST_ASSERT_EQUAL_MESSAGE(3, key2_count, "应有3个新事件(key_id=2)");
+    
+    // 验证：key_id=1 的事件应该是 capacity - 3 个（被覆盖了3个）
+    TEST_ASSERT_EQUAL_MESSAGE(capacity - 3, key1_count, 
+        "旧事件(key_id=1)应被覆盖3个");
+    
+    printf("覆写后数据正确性测试通过: 旧事件被正确覆盖\n");
+}
+
+void test_buffer_overwrite_multiple_cycles(void) {
+    printf("\n=== 测试连续多轮覆写 ===\n");
+    
+    static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
+    button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
+    bits_button_init(&button, 1, NULL, 0,
+                     test_framework_mock_read_button,
+                     test_framework_event_callback,
+                     test_framework_log_printf);
+    
+    size_t capacity = get_bits_btn_buffer_capacity();
+    size_t total_writes = capacity * 2 + 5;  // 写入超过2轮
+    
+    size_t initial_overwrite = get_bits_btn_buffer_overwrite_count();
+    
+    // 连续写入大量事件
+    for (size_t i = 0; i < total_writes; i++) {
+        mock_button_click(1, STANDARD_CLICK_TIME_MS);
+        time_simulate_time_window_end();
+        bits_button_ticks();
+    }
+    
+    size_t final_overwrite = get_bits_btn_buffer_overwrite_count();
+    size_t overwrite_delta = final_overwrite - initial_overwrite;
+    
+    // 验证覆写次数
+    size_t expected_overwrites = total_writes - capacity;
+    TEST_ASSERT_EQUAL_MESSAGE(expected_overwrites, overwrite_delta,
+        "覆写次数应等于 (总写入数 - 缓冲区容量)");
+    
+    // 验证只能读到 capacity 个事件
+    bits_btn_result_t result;
+    size_t read_count = 0;
+    while (bits_button_get_key_result(&result)) {
+        read_count++;
+        if (read_count > capacity + 10) break;  // 防止无限循环
+    }
+    
+    TEST_ASSERT_EQUAL_MESSAGE(capacity, read_count,
+        "只能读到缓冲区容量个事件");
+    
+    printf("连续多轮覆写测试通过: 覆写 %zu 次, 读取 %zu 个事件\n", 
+           overwrite_delta, read_count);
+}
+
+void test_buffer_overwrite_count_accuracy(void) {
+    printf("\n=== 测试覆写计数准确性 ===\n");
+    
+    static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
+    button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
+    bits_button_init(&button, 1, NULL, 0,
+                     test_framework_mock_read_button,
+                     test_framework_event_callback,
+                     test_framework_log_printf);
+    
+    size_t capacity = get_bits_btn_buffer_capacity();
+    
+    // 记录初始覆写计数
+    size_t count_before_fill = get_bits_btn_buffer_overwrite_count();
+    
+    // 填满缓冲区（不应触发覆写）
+    for (size_t i = 0; i < capacity; i++) {
+        mock_button_click(1, STANDARD_CLICK_TIME_MS);
+        time_simulate_time_window_end();
+        bits_button_ticks();
+    }
+    
+    size_t count_after_fill = get_bits_btn_buffer_overwrite_count();
+    TEST_ASSERT_EQUAL_MESSAGE(count_before_fill, count_after_fill,
+        "填满缓冲区不应触发覆写");
+    
+    // 再写入 5 个事件（应触发 5 次覆写）
+    const size_t extra_writes = 5;
+    for (size_t i = 0; i < extra_writes; i++) {
+        mock_button_click(1, STANDARD_CLICK_TIME_MS);
+        time_simulate_time_window_end();
+        bits_button_ticks();
+    }
+    
+    size_t count_after_extra = get_bits_btn_buffer_overwrite_count();
+    size_t actual_overwrites = count_after_extra - count_after_fill;
+    
+    TEST_ASSERT_EQUAL_MESSAGE(extra_writes, actual_overwrites,
+        "覆写计数应精确等于额外写入次数");
+    
+    printf("覆写计数准确性测试通过: 额外写入 %zu 次, 覆写计数增加 %zu\n",
+           extra_writes, actual_overwrites);
+}
