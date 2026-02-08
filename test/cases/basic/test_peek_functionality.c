@@ -57,7 +57,7 @@ void test_peek_functionality(void) {
     
     // 验证peek获取到的事件信息
     TEST_ASSERT_EQUAL_MESSAGE(1, result.key_id, "应为按键1的事件");
-    TEST_ASSERT_EQUAL_MESSAGE(BTN_STATE_FINISH, result.event, "应为完成事件");
+    TEST_ASSERT_EQUAL_MESSAGE(BTN_EVENT_FINISH, result.event, "应为完成事件");
     TEST_ASSERT_EQUAL_MESSAGE(BITS_BTN_SINGLE_CLICK_KV, result.key_value, "应为单击按键值");
     
     // 再次peek，应该仍然能获取到相同的事件（因为peek不会移除事件）

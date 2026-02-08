@@ -38,13 +38,11 @@ typedef enum {
 
 
 typedef enum {
-    BTN_STATE_IDLE              ,
-    BTN_STATE_PRESSED           ,
-    BTN_STATE_LONG_PRESS        ,
-    BTN_STATE_RELEASE           ,
-    BTN_STATE_RELEASE_WINDOW    ,
-    BTN_STATE_FINISH
-} bits_btn_state_t;
+    BTN_EVENT_PRESSED    = 1,  // Button pressed (after debounce)
+    BTN_EVENT_LONG_PRESS = 2,  // Long press detected or holding
+    BTN_EVENT_RELEASE    = 3,  // Button released
+    BTN_EVENT_FINISH     = 5,  // Button sequence completed (after time window)
+} bits_btn_event_t;
 
 //According to your need to modify the constants.
 #ifndef BITS_BTN_TICKS_INTERVAL
@@ -284,7 +282,7 @@ size_t get_bits_btn_buffer_capacity(void);
   * @param  cb: Pointer to the user-defined filter callback function. The callback should
   *            return 1 to write the event to buffer, 0 to filter it out. Pass NULL to disable.
   * @retval None
-  * @note   Only available in buffer mode. Default behavior writes BTN_STATE_LONG_PRESS and BTN_STATE_FINISH events.
+  * @note   Only available in buffer mode. Default behavior writes BTN_EVENT_LONG_PRESS and BTN_EVENT_FINISH events.
   */
 void bits_btn_register_result_filter_callback(bits_btn_result_user_filter_callback cb);
 

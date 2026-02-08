@@ -42,7 +42,7 @@ void test_slow_double_click_timeout(void) {
     time_simulate_pass(BITS_BTN_TIME_WINDOW_TIME_MS + 50);  // 超过时间窗口
     
     // 第一次点击应该已经完成，产生单击事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
     
     // 重置事件计数器，测试第二次点击
     test_framework_clear_events();
@@ -50,7 +50,7 @@ void test_slow_double_click_timeout(void) {
     time_simulate_time_window_end();
     
     // 第二次点击也应该是单击，而不是双击
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
     printf("超时双击测试通过: 两次独立的单击事件\n");
 }
 
@@ -85,7 +85,7 @@ void test_debounce_functionality(void) {
     time_simulate_time_window_end();
 
     // 应该只有一个有效的按键事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
     printf("消抖测试通过: 抖动被过滤，只有1个有效事件\n");
 }
 
@@ -114,8 +114,8 @@ void test_very_short_press(void) {
     time_simulate_time_window_end();
 
     // 极短按键应该被消抖过滤掉
-    ASSERT_EVENT_COUNT(1, BTN_STATE_PRESSED, 0);
-    ASSERT_EVENT_NOT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_COUNT(1, BTN_EVENT_PRESSED, 0);
+    ASSERT_EVENT_NOT_EXISTS(1, BTN_EVENT_FINISH);
     printf("极短按键测试通过: 被消抖过滤\n");
 }
 
@@ -146,7 +146,7 @@ void test_long_press_boundary(void) {
     time_simulate_time_window_end();
 
     // 应该触发长按事件
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_LONG_PRESS);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_LONG_PRESS);
     printf("长按边界测试通过: 刚好达到阈值触发长按\n");
 }
 
@@ -177,6 +177,6 @@ void test_rapid_clicks_boundary(void) {
     time_simulate_time_window_end();
 
     // 应该识别为三连击
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, 0b101010);  // 三连击: 010 + 010 + 10 = 101010
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, 0b101010);  // 三连击: 010 + 010 + 10 = 101010
     printf("快速连击边界测试通过: 时间窗口边界三连击\n");
 }

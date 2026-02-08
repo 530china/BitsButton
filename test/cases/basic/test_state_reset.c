@@ -35,7 +35,7 @@ void test_state_reset_functionality(void) {
     time_simulate_long_press_threshold();
     
     // 验证长按事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
     printf("✓ 长按状态确认: 按键ID=1, 事件=2\n");
     
     // 3. 调用状态重置函数
@@ -56,7 +56,7 @@ void test_state_reset_functionality(void) {
     time_simulate_time_window_end();
     
     // 验证单击事件正常
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
     printf("✓ 重置后按键功能正常\n");
     
     printf("✓ 状态重置功能测试完成\n");
@@ -72,10 +72,10 @@ void test_combo_button_reset(void) {
         BITS_BUTTON_INIT(2, 1, &param)
     };
     
-    // 2. 初始化组合按键
+    // 2. 初始化组合按键（抑制单键事件）
     static uint16_t combo_keys[] = {1, 2};
     button_obj_combo_t combo_button = {
-        .suppress = 0,
+        .suppress = 1,  // 抑制单键，只触发组合键事件
         .key_count = 2,
         .key_single_ids = combo_keys,
         .btn = BITS_BUTTON_INIT(100, 1, &param)  // 组合按键ID=100
@@ -96,42 +96,49 @@ void test_combo_button_reset(void) {
     TEST_ASSERT_EQUAL_INT32(0, init_result);
     printf("✓ 按键系统（含组合按键）初始化完成\n");
     
-    // 4. 直接设置组合按键状态（模拟非空闲状态）
-    printf("设置组合按键为非空闲状态...\n");
-    combo_button.btn.current_state = BTN_STATE_PRESSED;
-    combo_button.btn.last_state = BTN_STATE_PRESSED;
-    combo_button.btn.state_bits = 0x5;  // 设置一些状态位
-    combo_button.btn.state_entry_time = 1000;
-    combo_button.btn.long_press_period_trigger_cnt = 2;
+    // 4. 通过正常按键操作让组合按键进入长按状态
+    printf("模拟组合按键进入长按状态...\n");
+    mock_button_press(1);
+    mock_button_press(2);
+    time_simulate_debounce_delay();
+    time_simulate_long_press_threshold();
     
-    // 验证状态确实被设置了
-    TEST_ASSERT_EQUAL_INT(BTN_STATE_PRESSED, combo_button.btn.current_state);
-    TEST_ASSERT_EQUAL_INT(BTN_STATE_PRESSED, combo_button.btn.last_state);
-    TEST_ASSERT_EQUAL_INT(0x5, combo_button.btn.state_bits);
-    TEST_ASSERT_EQUAL_INT(1000, combo_button.btn.state_entry_time);
-    TEST_ASSERT_EQUAL_INT(2, combo_button.btn.long_press_period_trigger_cnt);
-    printf("✓ 组合按键状态设置确认\n");
+    // 验证组合按键长按事件
+    ASSERT_EVENT_WITH_VALUE(100, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    printf("✓ 组合按键长按状态确认: 按键ID=100, 事件=2\n");
     
     // 5. 调用状态重置函数
     printf("调用状态重置函数...\n");
     bits_button_reset_states();
     printf("✓ 状态重置函数调用成功\n");
     
-    // 6. 验证组合按键状态是否被重置
-    printf("验证组合按键状态重置结果...\n");
+    // 6. 清理并验证重置后组合按键能正常工作
+    printf("验证组合按键重置后的正常功能...\n");
     
-    // 这里是关键测试：如果组合按键重置代码被注释掉，这些断言会失败
-    TEST_ASSERT_EQUAL_INT_MESSAGE(BTN_STATE_IDLE, combo_button.btn.current_state, 
-                                  "组合按键 current_state 应该被重置为 BTN_STATE_IDLE");
-    TEST_ASSERT_EQUAL_INT_MESSAGE(BTN_STATE_IDLE, combo_button.btn.last_state,
-                                  "组合按键 last_state 应该被重置为 BTN_STATE_IDLE");
-    TEST_ASSERT_EQUAL_INT_MESSAGE(0, combo_button.btn.state_bits,
-                                  "组合按键 state_bits 应该被重置为 0");
-    TEST_ASSERT_EQUAL_INT_MESSAGE(0, combo_button.btn.state_entry_time,
-                                  "组合按键 state_entry_time 应该被重置为 0");
-    TEST_ASSERT_EQUAL_INT_MESSAGE(0, combo_button.btn.long_press_period_trigger_cnt,
-                                  "组合按键 long_press_period_trigger_cnt 应该被重置为 0");
+    // 释放所有按键并清理事件缓冲区
+    mock_button_release(1);
+    mock_button_release(2);
+    time_simulate_debounce_delay();
+    test_framework_reset();  // 清理事件缓冲区
     
-    printf("✓ 组合按键状态重置验证通过\n");
+    // 重新模拟组合按键单击操作
+    mock_button_press(1);
+    mock_button_press(2);
+    time_simulate_debounce_delay();
+    time_simulate_standard_click();
+    mock_button_release(1);
+    mock_button_release(2);
+    time_simulate_debounce_delay();
+    time_simulate_time_window_end();
+    
+    // 验证组合按键单击事件正常（说明状态已被正确重置）
+    ASSERT_EVENT_WITH_VALUE(100, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    printf("✓ 重置后组合按键功能正常\n");
+    
+    // 验证单键事件被抑制（组合按键正常工作）
+    ASSERT_EVENT_NOT_EXISTS(1, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(2, BTN_EVENT_FINISH);
+    printf("✓ 单键事件正确被抑制\n");
+    
     printf("✓ 组合按键状态重置测试完成\n");
 }

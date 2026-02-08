@@ -58,11 +58,13 @@ public:
     }
 
     // 测试枚举类型在类中的使用
-    bits_btn_state_t getButtonState(int index) {
+    // 注意：bits_btn_state_t 已移至内部，用户应使用 bits_btn_event_t
+    bits_btn_event_t getButtonEvent(int index) {
         if (index >= 0 && index < 3) {
-            return static_cast<bits_btn_state_t>(buttons[index].current_state);
+            // 这里仅用于测试类型兼容性，实际使用应通过 bits_button_get_result 获取事件
+            return BTN_EVENT_PRESSED;
         }
-        return BTN_STATE_IDLE;
+        return BTN_EVENT_FINISH;
     }
 };
 
@@ -114,10 +116,13 @@ int main() {
         );
 
         // 4. 枚举类型测试
+        // 注意：bits_btn_state_t 已移至内部，用户应使用 bits_btn_event_t
         std::cout << "4. 测试枚举类型..." << std::endl;
-        bits_btn_state_t state = BTN_STATE_IDLE;
-        state = BTN_STATE_PRESSED;
-        (void)state;
+        bits_btn_event_t event = BTN_EVENT_PRESSED;
+        event = BTN_EVENT_LONG_PRESS;
+        event = BTN_EVENT_RELEASE;
+        event = BTN_EVENT_FINISH;
+        (void)event;
 
         // 5. 所有宏定义可用性测试
         std::cout << "5. 测试宏定义..." << std::endl;
@@ -165,8 +170,8 @@ int main() {
         std::cout << "9. 测试C++类使用..." << std::endl;
         ButtonManager manager;
         button_obj_combo_t combo = manager.createComboButton();
-        bits_btn_state_t btn_state = manager.getButtonState(0);
-        (void)combo; (void)btn_state;
+        bits_btn_event_t btn_event = manager.getButtonEvent(0);
+        (void)combo; (void)btn_event;
 
         // 10. 命名空间测试
         std::cout << "10. 测试命名空间..." << std::endl;

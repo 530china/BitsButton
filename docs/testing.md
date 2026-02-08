@@ -69,7 +69,7 @@ void test_example_functionality(void) {
     // 验证结果
     bits_btn_result_t result;
     TEST_ASSERT_TRUE(bits_button_get_key_result(&result));
-    TEST_ASSERT_EQUAL(BTN_STATE_FINISH, result.event);
+    TEST_ASSERT_EQUAL(BTN_EVENT_FINISH, result.event);
     TEST_ASSERT_EQUAL(KEY_ID_1, result.key_id);
 
     // 清理
