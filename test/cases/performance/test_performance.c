@@ -27,10 +27,15 @@ void test_high_frequency_button_presses(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟快速连续点击
     int expected_clicks = 5;
@@ -57,10 +62,14 @@ void test_multiple_buttons_concurrent(void) {
         BITS_BUTTON_INIT(4, 1, &param)
     };
     
-    bits_button_init(buttons, 4, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 4,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟多个按键同时操作
     mock_button_click(1, STANDARD_CLICK_TIME_MS);  // 按键1单击
@@ -93,10 +102,15 @@ void test_long_running_stability(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟连续的按键操作序列
     for (int cycle = 0; cycle < 5; cycle++) {
@@ -129,10 +143,14 @@ void test_memory_usage(void) {
         buttons[i] = (button_obj_t)BITS_BUTTON_INIT(i, 1, &param);
     }
     
-    bits_button_init(buttons, MAX_TEST_BUTTONS, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = MAX_TEST_BUTTONS,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 同时操作所有按键
     for (int i = 0; i < MAX_TEST_BUTTONS; i++) {
@@ -147,4 +165,3 @@ void test_memory_usage(void) {
     
     printf("内存使用测试通过: %d个按键同时工作\n", MAX_TEST_BUTTONS);
 }
-

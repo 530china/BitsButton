@@ -27,10 +27,15 @@ void test_state_transition_timing(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试按下状态到长按状态的临界时间
     mock_button_press(1);
@@ -57,10 +62,15 @@ void test_time_window_boundary(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 第一次点击
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
@@ -84,10 +94,15 @@ void test_long_press_period_boundary(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 按下按键并触发长按
     mock_button_press(1);
@@ -135,10 +150,15 @@ void test_rapid_state_changes(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 快速的按下-释放序列，但要确保每次都超过消抖时间
     mock_button_press(1);

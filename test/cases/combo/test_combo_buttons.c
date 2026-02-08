@@ -42,10 +42,16 @@ void test_basic_combo_button(void) {
         1                   // 抑制单键事件
     );
     
-    bits_button_init(buttons, 2, &combo_button, 1, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo_button,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟组合按键按下
     mock_button_press(1);
@@ -89,10 +95,16 @@ void test_combo_long_press(void) {
         1                   // 抑制单键事件
     );
     
-    bits_button_init(buttons, 2, &combo_button, 1, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo_button,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟组合按键长按
     mock_button_press(1);
@@ -108,4 +120,3 @@ void test_combo_long_press(void) {
     ASSERT_EVENT_EXISTS(300, BTN_STATE_LONG_PRESS);
     printf("组合按键长按测试通过\n");
 }
-

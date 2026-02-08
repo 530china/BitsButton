@@ -27,10 +27,15 @@ void test_slow_double_click_timeout(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟过慢的双击
     mock_button_click(1, STANDARD_CLICK_TIME_MS);  // 第一次点击
@@ -57,10 +62,15 @@ void test_debounce_functionality(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟按键抖动 - 快速按下释放多次
     for (int i = 0; i < 5; i++) {
@@ -87,10 +97,15 @@ void test_very_short_press(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟极短按键（小于消抖时间）
     mock_button_press(1);
@@ -112,10 +127,15 @@ void test_long_press_boundary(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试刚好达到长按阈值
     mock_button_press(1);
@@ -138,10 +158,15 @@ void test_rapid_clicks_boundary(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 模拟在时间窗口边界的快速连击
     mock_button_click(1, 50);   // 第一次点击
@@ -155,4 +180,3 @@ void test_rapid_clicks_boundary(void) {
     ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, 0b101010);  // 三连击: 010 + 010 + 10 = 101010
     printf("快速连击边界测试通过: 时间窗口边界三连击\n");
 }
-

@@ -27,10 +27,15 @@ void test_buffer_overflow_protection(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 记录初始的溢出计数
     size_t initial_overwrite_count = get_bits_btn_buffer_overwrite_count();
@@ -114,10 +119,15 @@ void test_buffer_state_tracking(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 初始状态应该是空的
     TEST_ASSERT_TRUE(bits_btn_is_buffer_empty());
@@ -152,10 +162,15 @@ void test_buffer_edge_cases(void) {
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试从空缓冲区读取
     bits_btn_result_t result;
@@ -217,10 +232,14 @@ void test_buffer_overwrite_data_correctness(void) {
         buttons[i] = (button_obj_t)BITS_BUTTON_INIT(i + 1, 1, &param);
     }
     
-    bits_button_init(buttons, 10, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 10,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
     
     size_t capacity = get_bits_btn_buffer_capacity();
     
@@ -263,10 +282,15 @@ void test_buffer_overwrite_multiple_cycles(void) {
     
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
     
     size_t capacity = get_bits_btn_buffer_capacity();
     size_t total_writes = capacity * 2 + 5;  // 写入超过2轮
@@ -308,10 +332,15 @@ void test_buffer_overwrite_count_accuracy(void) {
     
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button,
-                     test_framework_event_callback,
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
     
     size_t capacity = get_bits_btn_buffer_capacity();
     

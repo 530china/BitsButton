@@ -81,7 +81,16 @@ int my_log_printf(const char* format, ...) {
 int main()
 {
     // 5. 按键初始化；
-    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, NULL, my_log_printf);
+    bits_btn_config_t config = {
+        .btns = btns,
+        .btns_cnt = ARRAY_SIZE(btns),
+        .btns_combo = btns_combo,
+        .btns_combo_cnt = ARRAY_SIZE(btns_combo),
+        .read_button_level_func = read_key_state,
+        .bits_btn_result_cb = NULL,
+        .bits_btn_debug_printf = my_log_printf
+    };
+    int32_t ret = bits_button_init(&config);
     if(ret)
     {
         printf("bits button init failed, ret:%d \r\n", ret);

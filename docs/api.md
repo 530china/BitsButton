@@ -5,31 +5,23 @@
 ### 初始化函数
 
 ```c
-int32_t bits_button_init(button_obj_t* btns,
-                         uint16_t btns_cnt,
-                         button_obj_combo_t *btns_combo,
-                         uint16_t btns_combo_cnt,
-                         uint8_t (*read_button_level_func)(struct button_obj_t *btn),
-                         void (*bits_btn_result_cb)(struct button_obj_t *btn, struct bits_btn_result button_result),
-                         int (*bis_btn_debug_printf)(const char* format, ...));
+int32_t bits_button_init(const bits_btn_config_t *config);
 ```
 
-初始化按键检测库，传入单按键数组、组合按键数组、按键状态读取函数、结果回调函数和日志打印函数。
+使用配置结构体初始化按键检测库。
 
 **参数：**
-- `btns`: 单按键对象数组
-- `btns_cnt`: 单按键对象数量
-- `btns_combo`: 组合按键对象数组
-- `btns_combo_cnt`: 组合按键对象数量
-- `read_button_level_func`: 读取按键状态的回调函数
-- `bits_btn_result_cb`: 按键事件结果回调函数
-- `bis_btn_debug_printf`: 日志打印函数
+- `config`: 指向配置结构体的指针，包含所有初始化参数
 
 **返回值：** 
 - 0: 成功
 - -1: 组合按键配置中存在无效的按键ID
 - -2: 输入参数无效
 - -3: 组合按键过多
+- -4: 需要外部缓冲区操作但未设置
+- -5: 按键数量过多
+- -6: 单按键参数无效
+- -7: 组合按键参数无效
 
 ---
 
@@ -135,6 +127,20 @@ void bits_btn_register_result_filter_callback(bits_btn_result_user_filter_callba
 
 ## 数据结构
 
+### 配置结构体
+
+```c
+typedef struct {
+    button_obj_t *btns;                                 // 单按键对象数组
+    uint16_t btns_cnt;                                  // 单按键对象数量
+    button_obj_combo_t *btns_combo;                     // 组合按键对象数组
+    uint16_t btns_combo_cnt;                            // 组合按键对象数量
+    bits_btn_read_button_level read_button_level_func;  // 状态读取函数
+    bits_btn_result_callback bits_btn_result_cb;        // 结果回调函数
+    bits_btn_debug_printf_func bits_btn_debug_printf;   // 日志打印函数
+} bits_btn_config_t;
+```
+
 ### 按键结果结构
 
 ```c
@@ -199,11 +205,16 @@ typedef struct button_obj_combo
 
 ```c
 // 初始化按键库
-int32_t ret = bits_button_init(btns, BTN_CNT,
-                combo_btns, COMBO_BTN_COUNT,
-                read_button_level_func,
-                result_callback,
-                debug_printf_func);
+bits_btn_config_t config = {
+    .btns = btns,
+    .btns_cnt = BTN_CNT,
+    .btns_combo = combo_btns,
+    .btns_combo_cnt = COMBO_BTN_COUNT,
+    .read_button_level_func = read_button_level_func,
+    .bits_btn_result_cb = result_callback,
+    .bits_btn_debug_printf = debug_printf_func
+};
+int32_t ret = bits_button_init(&config);
 if(ret != 0) {
     printf("Init failed, code: %d\n", ret);
 }

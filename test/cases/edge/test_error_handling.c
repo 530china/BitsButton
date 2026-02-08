@@ -24,35 +24,55 @@ void error_handling_tearDown(void) {
 void test_null_pointer_handling(void) {
     printf("\n=== 测试空指针处理 ===\n");
 
+    // 新增：测试配置结构体为NULL
+    int32_t result = bits_button_init(NULL);
+    TEST_ASSERT_EQUAL(-2, result);
+
     // 测试空按键数组
-    int32_t result = bits_button_init(NULL, 1, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config1 = {
+        .btns = NULL,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    result = bits_button_init(&config1);
     TEST_ASSERT_EQUAL(-2, result);  // 应该返回无效参数错误
 
     // 测试空读取函数
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
 
-    result = bits_button_init(&button, 1, NULL, 0,
-                              NULL,  // 空读取函数
-                              test_framework_event_callback,
-                              test_framework_log_printf);
+    bits_btn_config_t config2 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = NULL,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    result = bits_button_init(&config2);
     TEST_ASSERT_EQUAL(-2, result);  // 应该返回无效参数错误
 
     // 测试空事件回调（这个应该是允许的）
-    result = bits_button_init(&button, 1, NULL, 0,
-                              test_framework_mock_read_button,
-                              NULL,  // 空事件回调
-                              test_framework_log_printf);
+    bits_btn_config_t config3 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = NULL,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    result = bits_button_init(&config3);
     TEST_ASSERT_EQUAL(0, result);  // 应该成功
 
     // 测试空调试函数（这个应该是允许的）
-    result = bits_button_init(&button, 1, NULL, 0,
-                              test_framework_mock_read_button,
-                              test_framework_event_callback,
-                              NULL);  // 空调试函数
+    bits_btn_config_t config4 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = NULL
+    };
+    result = bits_button_init(&config4);
     TEST_ASSERT_EQUAL(0, result);  // 应该成功
 
     printf("空指针处理测试通过: 正确处理各种空指针情况\n");
@@ -65,10 +85,14 @@ void test_invalid_parameters(void) {
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
 
     // 测试零按键数量
-    int32_t result = bits_button_init(&button, 0, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config1 = {
+        .btns = &button,
+        .btns_cnt = 0,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config1);
     // 根据实现，这可能是有效的或无效的
     printf("零按键数量初始化结果: %d\n", result);
 
@@ -77,10 +101,16 @@ void test_invalid_parameters(void) {
     button_obj_combo_t invalid_combo =
         BITS_BUTTON_COMBO_INIT(200, 1, &param, invalid_combo_keys, 2, 1);
 
-    result = bits_button_init(&button, 1, &invalid_combo, 1,
-                              test_framework_mock_read_button,
-                              test_framework_event_callback,
-                              test_framework_log_printf);
+    bits_btn_config_t config2 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .btns_combo = &invalid_combo,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    result = bits_button_init(&config2);
     TEST_ASSERT_EQUAL(-1, result);  // 应该返回无效按键ID错误
 
     printf("无效参数测试通过: 正确检测和处理无效参数\n");
@@ -98,18 +128,26 @@ void test_boundary_values(void) {
     };
 
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &extreme_param);
-    int32_t result = bits_button_init(&button, 1, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config1 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config1);
     TEST_ASSERT_EQUAL(0, result);  // 应该能成功初始化
 
     // 测试极端按键ID
     button_obj_t extreme_button = BITS_BUTTON_INIT(65535, 1, &extreme_param);
-    result = bits_button_init(&extreme_button, 1, NULL, 0,
-                              test_framework_mock_read_button,
-                              test_framework_event_callback,
-                              test_framework_log_printf);
+    bits_btn_config_t config2 = {
+        .btns = &extreme_button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    result = bits_button_init(&config2);
     TEST_ASSERT_EQUAL(0, result);  // 应该能成功初始化
 
     // 测试基本功能是否正常（使用合理的按键ID避免溢出）
@@ -143,11 +181,16 @@ void test_resource_exhaustion(void) {
     }
 
     // 尝试初始化超过最大数量的组合按键
-    int32_t result = bits_button_init(buttons, BITS_BTN_MAX_COMBO_BUTTONS + 2,
-                                      combo_buttons, BITS_BTN_MAX_COMBO_BUTTONS + 1,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = BITS_BTN_MAX_COMBO_BUTTONS + 2,
+        .btns_combo = combo_buttons,
+        .btns_combo_cnt = BITS_BTN_MAX_COMBO_BUTTONS + 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
 
     // 根据实现，可能成功或失败
     printf("超过最大组合按键数量的初始化结果: %d\n", result);
@@ -169,10 +212,14 @@ void test_max_buttons_boundary(void) {
         buttons[i] = (button_obj_t)BITS_BUTTON_INIT(i + 1, 1, &param);
     }
 
-    int32_t result = bits_button_init(buttons, BITS_BTN_MAX_BUTTONS, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = BITS_BTN_MAX_BUTTONS,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
 
     TEST_ASSERT_EQUAL(0, result);  // 应成功
 
@@ -191,10 +238,14 @@ void test_too_many_buttons(void) {
         buttons[i] = (button_obj_t)BITS_BUTTON_INIT(i + 1, 1, &param);
     }
 
-    int32_t result = bits_button_init(buttons, BITS_BTN_MAX_BUTTONS + 1, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = BITS_BTN_MAX_BUTTONS + 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
 
     TEST_ASSERT_EQUAL(-5, result);  // 应返回按钮数量超限错误
 
@@ -213,10 +264,14 @@ void test_button_param_null(void) {
         BITS_BUTTON_INIT(3, 1, &param)
     };
 
-    int32_t result = bits_button_init(buttons, 3, NULL, 0,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 3,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
 
     TEST_ASSERT_EQUAL(-6, result);  // 应返回按钮 param 为空错误
 
@@ -239,13 +294,18 @@ void test_combo_button_param_null(void) {
     button_obj_combo_t combo =
         BITS_BUTTON_COMBO_INIT(100, 1, NULL, combo_keys, 2, 1);  // param 为 NULL
 
-    int32_t result = bits_button_init(buttons, 2, &combo, 1,
-                                      test_framework_mock_read_button,
-                                      test_framework_event_callback,
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
 
     TEST_ASSERT_EQUAL(-7, result);  // 应返回组合按钮 param 为空错误
 
     printf("组合按钮 param 为 NULL 测试通过: 正确返回错误码 -7\n");
 }
-

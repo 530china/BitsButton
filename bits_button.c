@@ -398,58 +398,57 @@ size_t get_bits_btn_buffer_capacity(void)
 #endif
 }
 
-int32_t bits_button_init(button_obj_t* btns                                     , \
-                         uint16_t btns_cnt                                      , \
-                         button_obj_combo_t *btns_combo                         , \
-                         uint16_t btns_combo_cnt                                , \
-                         bits_btn_read_button_level read_button_level_func      , \
-                         bits_btn_result_callback bits_btn_result_cb            , \
-                         bits_btn_debug_printf_func bis_btn_debug_printf          \
-                 )
+int32_t bits_button_init(const bits_btn_config_t *config)
 {
     bits_button_t *button = &bits_btn_entity;
-    debug_printf = bis_btn_debug_printf;
 
-    if ((btns == NULL)
-    || (btns_cnt == 0)
-    || (read_button_level_func == NULL)
-    || (btns_combo_cnt > 0 && btns_combo == NULL))
+    if (config == NULL)
+    {
+        return -2;
+    }
+
+    debug_printf = config->bits_btn_debug_printf;
+
+    if ((config->btns == NULL)
+    || (config->btns_cnt == 0)
+    || (config->read_button_level_func == NULL)
+    || (config->btns_combo_cnt > 0 && config->btns_combo == NULL))
     {
         if(debug_printf)
             debug_printf("Invalid init parameters !\n");
         return -2;
     }
 
-    if (btns_cnt > BITS_BTN_MAX_BUTTONS)
+    if (config->btns_cnt > BITS_BTN_MAX_BUTTONS)
     {
         if (debug_printf)
-            debug_printf("Error: Too many buttons (%d > max %d)\n", btns_cnt, (int)BITS_BTN_MAX_BUTTONS);
+            debug_printf("Error: Too many buttons (%d > max %d)\n", config->btns_cnt, (int)BITS_BTN_MAX_BUTTONS);
         return -5;
     }
 
     memset(button, 0, sizeof(bits_button_t));
 
-    button->btns = btns;
-    button->btns_cnt = btns_cnt;
-    button->btns_combo = btns_combo;
-    button->btns_combo_cnt = btns_combo_cnt;
-    button->_read_button_level = read_button_level_func;
-    button->bits_btn_result_cb = bits_btn_result_cb;
+    button->btns = config->btns;
+    button->btns_cnt = config->btns_cnt;
+    button->btns_combo = config->btns_combo;
+    button->btns_combo_cnt = config->btns_combo_cnt;
+    button->_read_button_level = config->read_button_level_func;
+    button->bits_btn_result_cb = config->bits_btn_result_cb;
 
-    if (btns_combo_cnt > BITS_BTN_MAX_COMBO_BUTTONS)
+    if (config->btns_combo_cnt > BITS_BTN_MAX_COMBO_BUTTONS)
     {
         if (debug_printf)
         {
             debug_printf("Error: Too many combo buttons (%d > max %d)\n",
-                         btns_combo_cnt, BITS_BTN_MAX_COMBO_BUTTONS);
+                         config->btns_combo_cnt, BITS_BTN_MAX_COMBO_BUTTONS);
         }
         return -3;
     }
 
     // Check single button param pointers
-    for (uint16_t i = 0; i < btns_cnt; i++)
+    for (uint16_t i = 0; i < config->btns_cnt; i++)
     {
-        if (btns[i].param == NULL)
+        if (config->btns[i].param == NULL)
         {
             if (debug_printf)
                 debug_printf("Error: Button[%d] param is NULL\n", i);
@@ -458,9 +457,9 @@ int32_t bits_button_init(button_obj_t* btns                                     
     }
 
     // Check combo button param pointers
-    for (uint16_t i = 0; i < btns_combo_cnt; i++)
+    for (uint16_t i = 0; i < config->btns_combo_cnt; i++)
     {
-        if (btns_combo[i].btn.param == NULL)
+        if (config->btns_combo[i].btn.param == NULL)
         {
             if (debug_printf)
                 debug_printf("Error: Combo button[%d] param is NULL\n", i);
@@ -468,7 +467,7 @@ int32_t bits_button_init(button_obj_t* btns                                     
         }
     }
 
-    for(uint16_t i = 0; i < btns_combo_cnt; i++)
+    for(uint16_t i = 0; i < config->btns_combo_cnt; i++)
     {
         button_obj_combo_t *combo = &button->btns_combo[i];
         combo->combo_mask = 0;

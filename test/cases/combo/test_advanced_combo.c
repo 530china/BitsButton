@@ -36,10 +36,16 @@ void test_advanced_three_key_combo(void) {
     static uint16_t combo_keys[] = {1, 2, 3};
     button_obj_combo_t combo = BITS_BUTTON_COMBO_INIT(100, 1, &param, combo_keys, 3, 1);
     
-    bits_button_init(buttons, 3, &combo, 1,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 3,
+        .btns_combo = &combo,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 同时按下三个键
     mock_set_button_state(1, 1);
@@ -79,10 +85,16 @@ void test_combo_with_different_timing(void) {
     static uint16_t combo_keys[] = {1, 2};
     button_obj_combo_t combo = BITS_BUTTON_COMBO_INIT(100, 1, &param, combo_keys, 2, 1);
     
-    bits_button_init(buttons, 2, &combo, 1,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试1: 先按键1，后按键2
     mock_set_button_state(1, 1);
@@ -138,10 +150,16 @@ void test_multiple_combos_conflict(void) {
         BITS_BUTTON_COMBO_INIT(101, 1, &param, combo2_keys, 2, 1)
     };
     
-    bits_button_init(buttons, 3, combos, 2,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 3,
+        .btns_combo = combos,
+        .btns_combo_cnt = 2,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 按下键1和键2（应该触发组合键100）
     mock_set_button_state(1, 1);
@@ -176,4 +194,3 @@ void test_multiple_combos_conflict(void) {
     
     printf("多组合键冲突测试通过: 不同组合键正确识别\n");
 }
-

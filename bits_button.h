@@ -8,8 +8,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
+// The maximum number of combined buttons supported
 #ifndef BITS_BTN_MAX_COMBO_BUTTONS
-#define BITS_BTN_MAX_COMBO_BUTTONS  8 // 默认最大支持8个组合按钮
+#define BITS_BTN_MAX_COMBO_BUTTONS  8
 #endif
 
 typedef uint32_t key_value_type_t;
@@ -154,43 +155,34 @@ typedef struct
     uint8_t (*peek)(bits_btn_result_t *result);
 } bits_btn_buffer_ops_t;
 
+typedef struct
+{
+    button_obj_t *btns;
+    uint16_t btns_cnt;
+    button_obj_combo_t *btns_combo;
+    uint16_t btns_combo_cnt;
+    bits_btn_read_button_level read_button_level_func;
+    bits_btn_result_callback bits_btn_result_cb;
+    bits_btn_debug_printf_func bits_btn_debug_printf;
+} bits_btn_config_t;
+
 /**
   * @brief  Initialize the button structure and configure button detection parameters.
-  *         This function sets up the button system, including single and combination buttons,
-  *         and registers callback functions for button state changes.
+  *         This function sets up the button system using the provided configuration.
   *
-  * @param  btns: Pointer to an array of button objects. Each object contains button-specific
-  *               parameters such as key ID, debounce time, and callback functions.
-  * @param  btns_cnt: Number of button objects in the array (i.e., the number of single buttons).
-  * @param  btns_combo: Pointer to an array of button combination objects. These define
-  *                     multi-button presses (e.g., simultaneous key combinations).
-  * @param  btns_combo_cnt: Number of button combination objects.
-  * @param  read_button_level_func: Function pointer to the button level reading function.
-  *                               This function should return the current state (pressed/released)
-  *                               of the physical button.
-  * @param  bits_btn_result_cb: Callback function pointer for button state changes.
-  *                           This function is called when a button event (press, release, etc.) is detected.
-  * @param  bis_btn_debug_printf: Function pointer for debug logging. Pass NULL if debug output is not needed.
+  * @param  config: Pointer to the configuration structure containing all initialization parameters.
   *
-* @retval Status code indicating the result of the initialization:
+  * @retval Status code indicating the result of the initialization:
   *         - 0: Success. All parameters are valid, and the button system is initialized.
-  *         - -1: Invalid key ID in combination button configuration. A key ID specified in a
-  *               combination button configuration does not exist in the single button array.
-  *         - -2: Invalid input parameters. Returned if either `btns` or `read_button_level_func` is NULL.
+  *         - -1: Invalid key ID in combination button configuration.
+  *         - -2: Invalid input parameters. Returned if config is NULL or required fields are missing.
   *         - -3: Too many combo buttons. The number of combo buttons exceeds BITS_BTN_MAX_COMBO_BUTTONS.
   *         - -4: User buffer mode requires setting buffer ops before init.
   *         - -5: Too many buttons. The number of buttons exceeds BITS_BTN_MAX_BUTTONS.
   *         - -6: Button param is NULL. A single button has NULL param pointer.
   *         - -7: Combo button param is NULL. A combo button has NULL param pointer.
   */
-int32_t bits_button_init(button_obj_t* btns                                     , \
-                         uint16_t btns_cnt                                      , \
-                         button_obj_combo_t *btns_combo                         , \
-                         uint16_t btns_combo_cnt                                , \
-                         bits_btn_read_button_level read_button_level_func      , \
-                         bits_btn_result_callback bits_btn_result_cb            , \
-                         bits_btn_debug_printf_func bis_btn_debug_printf          \
-);
+int32_t bits_button_init(const bits_btn_config_t *config);
 
 /**
   * @brief  Background ticks function, called repeatedly by the timer with an interval of 5ms.

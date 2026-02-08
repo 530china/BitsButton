@@ -170,7 +170,16 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
 int main()
 {
     // 6. 按键初始化；
-    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, bits_btn_result_cb, my_log_printf);
+    bits_btn_config_t config = {
+        .btns = btns,
+        .btns_cnt = ARRAY_SIZE(btns),
+        .btns_combo = btns_combo,
+        .btns_combo_cnt = ARRAY_SIZE(btns_combo),
+        .read_button_level_func = read_key_state,
+        .bits_btn_result_cb = bits_btn_result_cb,
+        .bits_btn_debug_printf = my_log_printf
+    };
+    int32_t ret = bits_button_init(&config);
     if(ret)
     {
         printf("bits button init failed, ret:%d \r\n", ret);
@@ -276,7 +285,16 @@ int my_log_printf(const char* format, ...) {
 int main()
 {
     // 5. 按键初始化；
-    int32_t ret = bits_button_init(btns, ARRAY_SIZE(btns), btns_combo, ARRAY_SIZE(btns_combo), read_key_state, NULL, my_log_printf);
+    bits_btn_config_t config = {
+        .btns = btns,
+        .btns_cnt = ARRAY_SIZE(btns),
+        .btns_combo = btns_combo,
+        .btns_combo_cnt = ARRAY_SIZE(btns_combo),
+        .read_button_level_func = read_key_state,
+        .bits_btn_result_cb = NULL,
+        .bits_btn_debug_printf = my_log_printf
+    };
+    int32_t ret = bits_button_init(&config);
     if(ret)
     {
         printf("bits button init failed, ret:%d \r\n", ret);
@@ -305,7 +323,7 @@ int main()
 
 ### 按键初始化
 
-使用`bits_button_init()`函数初始化按键系统，需要提供单按键数组、组合按键数组、状态读取函数、结果回调函数和日志函数。
+使用`bits_button_init()`函数初始化按键系统，需要提供`bits_btn_config_t`配置结构体，包含单按键数组、组合按键数组、状态读取函数、结果回调函数和日志函数。
 
 ### 事件类型
 
