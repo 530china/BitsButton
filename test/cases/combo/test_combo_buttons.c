@@ -64,11 +64,11 @@ void test_basic_combo_button(void) {
     time_simulate_time_window_end();
 
     // 验证组合按键事件
-    ASSERT_EVENT_EXISTS(100, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(100, BTN_EVENT_FINISH);
     
     // 验证单键被抑制（不应该有单键事件）
-    ASSERT_EVENT_NOT_EXISTS(1, BTN_STATE_FINISH);
-    ASSERT_EVENT_NOT_EXISTS(2, BTN_STATE_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(1, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(2, BTN_EVENT_FINISH);
     printf("组合按键测试通过\n");
 }
 
@@ -117,6 +117,6 @@ void test_combo_long_press(void) {
     time_simulate_time_window_end();
 
     // 验证组合按键长按事件
-    ASSERT_EVENT_EXISTS(300, BTN_STATE_LONG_PRESS);
+    ASSERT_EVENT_EXISTS(300, BTN_EVENT_LONG_PRESS);
     printf("组合按键长按测试通过\n");
 }

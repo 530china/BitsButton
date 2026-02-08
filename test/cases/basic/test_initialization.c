@@ -49,7 +49,7 @@ void test_successful_initialization(void) {
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     
     printf("成功初始化测试通过: 返回码0，基本功能正常\n");
 }
@@ -77,7 +77,7 @@ void test_different_active_levels(void) {
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     
     // 清空事件
     test_framework_clear_events();
@@ -86,7 +86,7 @@ void test_different_active_levels(void) {
     mock_button_click(2, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    ASSERT_EVENT_EXISTS(2, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(2, BTN_EVENT_FINISH);
     
     printf("不同激活电平测试通过: 多个按键都正常工作\n");
 }
@@ -143,13 +143,13 @@ void test_custom_parameters(void) {
         mock_button_click(1, STANDARD_CLICK_TIME_MS);
         time_simulate_time_window_end();
         
-        ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+        ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
         printf("自定义参数测试通过: 默认参数正常工作\n");
         return;
     }
     
     // 应该是单击
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     
     printf("自定义参数测试通过: 自定义参数正确生效\n");
 }
@@ -186,7 +186,7 @@ void test_multiple_button_initialization(void) {
     
     // 验证所有按键都产生了事件
     for (int i = 0; i < test_count; i++) {
-        ASSERT_EVENT_EXISTS(i + 1, BTN_STATE_FINISH);
+        ASSERT_EVENT_EXISTS(i + 1, BTN_EVENT_FINISH);
     }
     
     printf("多按键初始化测试通过: %d个按键都正常工作\n", test_count);
@@ -218,7 +218,7 @@ void test_callback_functions(void) {
     time_simulate_time_window_end();
     
     // 验证事件回调正常工作
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     printf("✓ 事件回调正常工作\n");
     
     // 清空事件
@@ -304,7 +304,7 @@ void test_callback_functions(void) {
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
     time_simulate_time_window_end();
     
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     printf("✓ 完整回调配置正常工作\n");
     
     printf("✓ 回调函数测试通过: 所有回调组合都经过验证\n");

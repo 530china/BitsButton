@@ -50,14 +50,14 @@ uint8_t bits_button_peek_key_result(bits_btn_result_t *result);
 bits_btn_result_t preview_result;
 if (bits_button_peek_key_result(&preview_result)) {
     // 根据事件类型决定是否深度处理
-    if (preview_result.event == BTN_STATE_PRESSED) {
+    if (preview_result.event == BTN_EVENT_PRESSED) {
         // 特定事件才消费并处理
         bits_btn_result_t actual_result;
         if (bits_button_get_key_result(&actual_result)) {
             // 实际处理事件
             handle_single_click(&actual_result);
         }
-    } else if (preview_result.event == BTN_STATE_LONG_PRESS) {
+    } else if (preview_result.event == BTN_EVENT_LONG_PRESS) {
         // 长按开始事件，可能需要不同处理
         bits_btn_result_t actual_result;
         if (bits_button_get_key_result(&actual_result)) {

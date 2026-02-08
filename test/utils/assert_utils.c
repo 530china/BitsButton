@@ -92,7 +92,7 @@ void assert_long_press_count_impl(uint16_t key_id, uint16_t expected_count, int 
     
     for (int i = 0; i < event_count; i++) {
         if (events[i].key_id == key_id && 
-            events[i].event == BTN_STATE_LONG_PRESS && 
+            events[i].event == BTN_EVENT_LONG_PRESS && 
             events[i].long_press_period_trigger_cnt > 0) {
             hold_events++;
         }
@@ -112,7 +112,7 @@ void assert_long_press_count_impl(uint16_t key_id, uint16_t expected_count, int 
 void assert_combo_suppression_impl(uint16_t combo_key_id, uint16_t* suppressed_key_ids, 
                                    int count, int line) {
     // 验证组合按键事件存在
-    bits_btn_result_t* combo_event = assert_find_event(combo_key_id, BTN_STATE_FINISH);
+    bits_btn_result_t* combo_event = assert_find_event(combo_key_id, BTN_EVENT_FINISH);
     if (combo_event == NULL) {
         printf("断言失败 (行 %d): 组合按键事件不存在 - ID=%d\n", line, combo_key_id);
         TEST_FAIL_MESSAGE("组合按键事件不存在");
@@ -121,7 +121,7 @@ void assert_combo_suppression_impl(uint16_t combo_key_id, uint16_t* suppressed_k
     
     // 验证单键事件被抑制
     for (int i = 0; i < count; i++) {
-        bits_btn_result_t* single_event = assert_find_event(suppressed_key_ids[i], BTN_STATE_FINISH);
+        bits_btn_result_t* single_event = assert_find_event(suppressed_key_ids[i], BTN_EVENT_FINISH);
         if (single_event != NULL) {
             printf("断言失败 (行 %d): 单键事件未被抑制 - ID=%d\n", line, suppressed_key_ids[i]);
             TEST_FAIL_MESSAGE("单键事件未被抑制");

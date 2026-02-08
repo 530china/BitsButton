@@ -84,17 +84,17 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
 {
     printf("id:%d, event:%d, key_value:%d, long press period trigger cnt:%d \r\n", result.key_id, result.event, result.key_value, result.long_press_period_trigger_cnt);
 
-    if(result.event == BTN_STATE_PRESSED)
+    if(result.event == BTN_EVENT_PRESSED)
     {
         printf("id:%d pressed \n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_RELEASE)
+    if(result.event == BTN_EVENT_RELEASE)
     {
         printf("id:%d release\n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_LONG_PRESS)
+    if(result.event == BTN_EVENT_LONG_PRESS)
     {
         if(result.key_value == 0b11)
             printf("id:%d, long press start\n", result.key_id);
@@ -108,7 +108,7 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
             printf("id:%d, double click and long press start\n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_FINISH)
+    if(result.event == BTN_EVENT_FINISH)
     {
         switch(result.key_value)
         {
@@ -125,7 +125,7 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
     }
 
     // 通用的长按保持处理（不同的方式判别长按保持）
-    if(result.event == BTN_STATE_LONG_PRESS && result.long_press_period_trigger_cnt > 0)
+    if(result.event == BTN_EVENT_LONG_PRESS && result.long_press_period_trigger_cnt > 0)
     {
         printf("[%d] 长按保持 周期:%d\r\n",
                result.key_id,

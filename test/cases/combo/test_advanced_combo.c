@@ -61,12 +61,12 @@ void test_advanced_three_key_combo(void) {
     time_simulate_time_window_end();
     
     // 验证组合键事件
-    ASSERT_EVENT_EXISTS(100, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(100, BTN_EVENT_FINISH);
     
     // 验证单键被抑制
-    ASSERT_EVENT_NOT_EXISTS(1, BTN_STATE_FINISH);
-    ASSERT_EVENT_NOT_EXISTS(2, BTN_STATE_FINISH);
-    ASSERT_EVENT_NOT_EXISTS(3, BTN_STATE_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(1, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(2, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(3, BTN_EVENT_FINISH);
     
     printf("三键组合测试通过: 组合键触发，单键被抑制\n");
 }
@@ -108,7 +108,7 @@ void test_combo_with_different_timing(void) {
     time_simulate_time_window_end();
     
     // 验证组合键事件
-    ASSERT_EVENT_EXISTS(100, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(100, BTN_EVENT_FINISH);
     
     // 清空事件
     test_framework_clear_events();
@@ -125,7 +125,7 @@ void test_combo_with_different_timing(void) {
     time_simulate_time_window_end();
     
     // 验证组合键事件
-    ASSERT_EVENT_EXISTS(100, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(100, BTN_EVENT_FINISH);
     
     printf("不同时序组合按键测试通过: 按键顺序不影响组合识别\n");
 }
@@ -172,8 +172,8 @@ void test_multiple_combos_conflict(void) {
     time_simulate_time_window_end();
     
     // 验证组合键100触发
-    ASSERT_EVENT_EXISTS(100, BTN_STATE_FINISH);
-    ASSERT_EVENT_NOT_EXISTS(101, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(100, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(101, BTN_EVENT_FINISH);
     
     // 清空事件
     test_framework_clear_events();
@@ -189,8 +189,8 @@ void test_multiple_combos_conflict(void) {
     time_simulate_time_window_end();
     
     // 验证组合键101触发
-    ASSERT_EVENT_EXISTS(101, BTN_STATE_FINISH);
-    ASSERT_EVENT_NOT_EXISTS(100, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(101, BTN_EVENT_FINISH);
+    ASSERT_EVENT_NOT_EXISTS(100, BTN_EVENT_FINISH);
     
     printf("多组合键冲突测试通过: 不同组合键正确识别\n");
 }

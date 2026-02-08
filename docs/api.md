@@ -195,12 +195,23 @@ typedef struct button_obj_combo
 
 ## 事件类型
 
-- `BTN_STATE_IDLE`: 空闲状态
-- `BTN_STATE_PRESSED`: 按下
-- `BTN_STATE_LONG_PRESS`: 长按
-- `BTN_STATE_RELEASE`: 抬起
-- `BTN_STATE_RELEASE_WINDOW`: 释放窗口
-- `BTN_STATE_FINISH`: 完成
+用户可见的事件类型通过 `bits_btn_event_t` 枚举定义：
+
+```c
+typedef enum {
+    BTN_EVENT_PRESSED    = 1,  // 按键按下（消抖后）
+    BTN_EVENT_LONG_PRESS = 2,  // 长按检测或保持中
+    BTN_EVENT_RELEASE    = 3,  // 按键释放
+    BTN_EVENT_FINISH     = 5,  // 按键序列完成（时间窗口结束后）
+} bits_btn_event_t;
+```
+
+- `BTN_EVENT_PRESSED`: 按键按下（消抖后触发）
+- `BTN_EVENT_LONG_PRESS`: 长按开始或长按保持中
+- `BTN_EVENT_RELEASE`: 按键释放
+- `BTN_EVENT_FINISH`: 按键动作完成（时间窗口结束，可判断单击/双击/连击等）
+
+> **注意**: 内部状态机状态（如 IDLE, RELEASE_WINDOW 等）不再暴露给用户，仅在库内部使用。
 
 ## 错误码枚举
 
@@ -250,7 +261,7 @@ while(bits_button_get_key_result(&result)) {
 bits_btn_result_t preview;
 if(bits_button_peek_key_result(&preview)) {
     // 根据预览的事件决定是否进一步处理
-    if(preview.event == BTN_STATE_PRESSED) {
+    if(preview.event == BTN_EVENT_PRESSED) {
         // 消费事件
         bits_button_get_key_result(&result);
         // 实际处理

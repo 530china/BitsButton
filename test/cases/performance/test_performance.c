@@ -44,7 +44,7 @@ void test_high_frequency_button_presses(void) {
 
     // 验证最终的连击序列 - 5连击的位模式(5连击应该是 0b1010101010)
     uint32_t expected_pattern = 0b1010101010; // 5连击: 010+010+010+010+10 = 1010101010
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, expected_pattern);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, expected_pattern);
     printf("高频按键测试通过: %d连击\n", expected_clicks);
 }
 
@@ -86,10 +86,10 @@ void test_multiple_buttons_concurrent(void) {
     time_simulate_time_window_end();
 
     // 验证各个按键的事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
-    ASSERT_EVENT_WITH_VALUE(2, BTN_STATE_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
-    ASSERT_EVENT_WITH_VALUE(3, BTN_STATE_FINISH, 0b101010);  // 三连击: 010 + 010 + 10 = 101010
-    ASSERT_EVENT_EXISTS(4, BTN_STATE_LONG_PRESS);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(2, BTN_EVENT_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(3, BTN_EVENT_FINISH, 0b101010);  // 三连击: 010 + 010 + 10 = 101010
+    ASSERT_EVENT_EXISTS(4, BTN_EVENT_LONG_PRESS);
     
     printf("多按键并发测试通过: 4个按键同时处理\n");
 }
@@ -125,7 +125,7 @@ void test_long_running_stability(void) {
     time_simulate_time_window_end();
     
     // 验证系统在连续操作后仍然稳定 - 应该产生10连击模式
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, 0b10101010101010101010); // 10连击模式
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, 0b10101010101010101010); // 10连击模式
     printf("长时间运行稳定性测试通过: 连续操作稳定\n");
 }
 
@@ -160,7 +160,7 @@ void test_memory_usage(void) {
 
     // 验证所有按键都产生了事件
     for (int i = 0; i < MAX_TEST_BUTTONS; i++) {
-        ASSERT_EVENT_EXISTS(i, BTN_STATE_FINISH);
+        ASSERT_EVENT_EXISTS(i, BTN_EVENT_FINISH);
     }
     
     printf("内存使用测试通过: %d个按键同时工作\n", MAX_TEST_BUTTONS);

@@ -42,7 +42,7 @@ void test_single_click_event(void) {
     time_simulate_time_window_end();
 
     // 验证结果
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_SINGLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_SINGLE_CLICK_KV);
     printf("单击测试通过\n");
 }
 
@@ -69,7 +69,7 @@ void test_double_click_event(void) {
     time_simulate_time_window_end();
 
     // 验证结果
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
     printf("双击测试通过\n");
 }
 
@@ -96,7 +96,7 @@ void test_triple_click_event(void) {
     time_simulate_time_window_end();
 
     // 验证结果 - 使用库定义的双击常量
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
     printf("快速双击测试通过\n");
 }
 
@@ -127,7 +127,7 @@ void test_long_press_event(void) {
     time_simulate_time_window_end();
 
     // 验证长按开始事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
     printf("长按测试通过\n");
 }
 

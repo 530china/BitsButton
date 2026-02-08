@@ -42,7 +42,7 @@ void test_state_transition_timing(void) {
     time_simulate_debounce_delay();
     
     // 验证按下事件
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_PRESSED);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_PRESSED);
     
     // 在长按阈值前释放
     mock_button_release(1);
@@ -50,7 +50,7 @@ void test_state_transition_timing(void) {
     time_simulate_time_window_end();
     
     // 应该是单击，不是长按
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     
     printf("状态转换时序测试通过: 长按阈值边界正确\n");
 }
@@ -83,7 +83,7 @@ void test_time_window_boundary(void) {
     time_simulate_time_window_end();
     
     // 应该识别为双击
-    ASSERT_EVENT_WITH_VALUE(1, BTN_STATE_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_FINISH, BITS_BTN_DOUBLE_CLICK_KV);
     
     printf("时间窗口边界测试通过: 时间窗口边界正确处理\n");
 }
@@ -110,7 +110,7 @@ void test_long_press_period_boundary(void) {
     time_simulate_long_press_threshold();
     
     // 验证长按开始
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_LONG_PRESS);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_LONG_PRESS);
     
     // 等待长按周期触发 - 需要额外的时间来触发周期事件
     time_simulate_pass(param.long_press_period_triger_ms + 50);
@@ -122,7 +122,7 @@ void test_long_press_period_boundary(void) {
     
     for (int i = 0; i < event_count; i++) {
         if (events[i].key_id == 1 && 
-            events[i].event == BTN_STATE_LONG_PRESS && 
+            events[i].event == BTN_EVENT_LONG_PRESS && 
             events[i].long_press_period_trigger_cnt > 0) {
             hold_count++;
         }
@@ -180,7 +180,7 @@ void test_rapid_state_changes(void) {
     time_simulate_time_window_end();
     
     // 验证系统能够处理快速状态变化 - 应该识别为三连击
-    ASSERT_EVENT_EXISTS(1, BTN_STATE_FINISH);
+    ASSERT_EVENT_EXISTS(1, BTN_EVENT_FINISH);
     
     printf("快速状态变化测试通过: 系统能处理快速状态变化\n");
 }

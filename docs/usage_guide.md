@@ -117,17 +117,17 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
 {
     printf("id:%d, event:%d, key_value:%d, long press period trigger cnt:%d \r\n", result.key_id, result.event, result.key_value, result.long_press_period_trigger_cnt);
 
-    if(result.event == BTN_STATE_PRESSED)
+    if(result.event == BTN_EVENT_PRESSED)
     {
         printf("id:%d pressed \n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_RELEASE)
+    if(result.event == BTN_EVENT_RELEASE)
     {
         printf("id:%d release\n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_LONG_PRESS)
+    if(result.event == BTN_EVENT_LONG_PRESS)
     {
         if(result.key_value == 0b11)
             printf("id:%d, long press start\n", result.key_id);
@@ -141,7 +141,7 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
             printf("id:%d, double click and long press start\n", result.key_id);
     }
 
-    if(result.event == BTN_STATE_FINISH)
+    if(result.event == BTN_EVENT_FINISH)
     {
         switch(result.key_value)
         {
@@ -158,7 +158,7 @@ void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)
     }
 
     // 通用的长按保持处理（不同的方式判别长按保持）
-    if(result.event == BTN_STATE_LONG_PRESS && result.long_press_period_trigger_cnt > 0)
+    if(result.event == BTN_EVENT_LONG_PRESS && result.long_press_period_trigger_cnt > 0)
     {
         printf("[%d] 长按保持 周期:%d\r\n",
                result.key_id,
@@ -327,10 +327,12 @@ int main()
 
 ### 事件类型
 
-- `BTN_STATE_PRESSED`：按键按下
-- `BTN_STATE_RELEASE`：按键释放
-- `BTN_STATE_LONG_PRESS`：长按事件
-- `BTN_STATE_FINISH`：按键动作完成
+用户可见的事件类型通过 `bits_btn_event_t` 枚举定义：
+
+- `BTN_EVENT_PRESSED`：按键按下（消抖后触发）
+- `BTN_EVENT_RELEASE`：按键释放
+- `BTN_EVENT_LONG_PRESS`：长按开始或长按保持中
+- `BTN_EVENT_FINISH`：按键动作完成（时间窗口结束，可判断单击/双击/连击等）
 
 ### 组合按键
 
@@ -346,12 +348,12 @@ void low_power_handler(void) {
     // 先预览事件类型，决定是否完全处理
     bits_btn_result_t preview;
     if(bits_button_peek_key_result(&preview)) {
-        if(preview.event == BTN_STATE_LONG_PRESS && preview.key_id == POWER_KEY_ID) {
+        if(preview.event == BTN_EVENT_LONG_PRESS && preview.key_id == POWER_KEY_ID) {
             // 电源键长按，执行关机
             bits_btn_result_t actual;
             bits_button_get_key_result(&actual);  // 消费事件
             system_shutdown();
-        } else if(preview.event == BTN_STATE_PRESSED && preview.key_id == WAKEUP_KEY_ID) {
+        } else if(preview.event == BTN_EVENT_PRESSED && preview.key_id == WAKEUP_KEY_ID) {
             // 唤醒键单击，恢复正常模式
             bits_btn_result_t actual;
             bits_button_get_key_result(&actual);  // 消费事件

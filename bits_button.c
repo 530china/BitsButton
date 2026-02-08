@@ -5,6 +5,27 @@ static bits_button_t bits_btn_entity;
 static bits_btn_debug_printf_func debug_printf = NULL;
 static void debug_print_binary(key_value_type_t num);
 
+// Internal state machine states (not exposed to users)
+typedef enum {
+    BTN_STATE_IDLE              ,
+    BTN_STATE_PRESSED           ,
+    BTN_STATE_LONG_PRESS        ,
+    BTN_STATE_RELEASE           ,
+    BTN_STATE_RELEASE_WINDOW    ,
+    BTN_STATE_FINISH
+} bits_btn_state_t;
+
+static bits_btn_event_t state_to_event(bits_btn_state_t state)
+{
+    switch (state) {
+        case BTN_STATE_PRESSED:    return BTN_EVENT_PRESSED;
+        case BTN_STATE_LONG_PRESS: return BTN_EVENT_LONG_PRESS;
+        case BTN_STATE_RELEASE:    return BTN_EVENT_RELEASE;
+        case BTN_STATE_FINISH:     return BTN_EVENT_FINISH;
+        default:                   return (bits_btn_event_t)0;
+    }
+}
+
 // ============================================================================
 // Buffer Implementation Selection
 // ============================================================================
@@ -665,7 +686,7 @@ static void bits_btn_report_event(struct button_obj_t* button, bits_btn_result_t
 
 #ifndef BITS_BTN_DISABLE_BUFFER
     uint8_t is_user_result_filter_exist = (bits_btn_result_user_filter_cb != NULL);
-    uint8_t default_result_filter_triger = (result->event == BTN_STATE_LONG_PRESS) || (result->event == BTN_STATE_FINISH);
+    uint8_t default_result_filter_triger = (result->event == BTN_EVENT_LONG_PRESS) || (result->event == BTN_EVENT_FINISH);
 
     if (bits_btn_buffer_ops && bits_btn_buffer_ops->write)
     {
@@ -719,7 +740,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
                 button->state_entry_time = current_time;
 
                 result.key_value = button->state_bits;
-                result.event = button->current_state;
+                result.event = state_to_event((bits_btn_state_t)button->current_state);
                 bits_btn_report_event(button, &result);
             }
             break;
@@ -733,7 +754,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
                 button->long_press_period_trigger_cnt = 0;
 
                 result.key_value = button->state_bits;
-                result.event = button->current_state;
+                result.event = state_to_event((bits_btn_state_t)button->current_state);
                 bits_btn_report_event(button, &result);
             }
             else if (btn_pressed == 0)
@@ -758,7 +779,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
                 }
 
                 result.key_value = button->state_bits;
-                result.event = button->current_state;
+                result.event = state_to_event((bits_btn_state_t)button->current_state);
                 result.long_press_period_trigger_cnt = button->long_press_period_trigger_cnt;
                 bits_btn_report_event(button, &result);
             }
@@ -767,7 +788,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
             __append_bit(&button->state_bits, 0);
 
             result.key_value = button->state_bits;
-            result.event = BTN_STATE_RELEASE;
+            result.event = BTN_EVENT_RELEASE;
             bits_btn_report_event(button, &result);
 
             button->current_state = BTN_STATE_RELEASE_WINDOW;
@@ -789,7 +810,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
         case BTN_STATE_FINISH:
 
             result.key_value = button->state_bits;
-            result.event = BTN_STATE_FINISH;
+            result.event = BTN_EVENT_FINISH;
             bits_btn_report_event(button, &result);
 
             button->state_bits = 0;
