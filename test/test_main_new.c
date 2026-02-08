@@ -111,6 +111,11 @@ void performance_tests_teardown(void) {
 
 // ==================== Unity标准设置函数 ====================
 
+// 定义最大失败记录数（200个足够容纳所有测试用例）
+#define MAX_FAILED_TESTS 200
+static const char* failed_tests[MAX_FAILED_TESTS];
+static int failed_test_count = 0;
+
 void setUp(void) {
     // Unity会在每个测试前调用
     test_framework_reset();
@@ -118,7 +123,11 @@ void setUp(void) {
 
 void tearDown(void) {
     // Unity会在每个测试后调用
-    // 清理工作
+    if (Unity.CurrentTestFailed) {
+        if (failed_test_count < MAX_FAILED_TESTS) {
+            failed_tests[failed_test_count++] = Unity.CurrentTestName;
+        }
+    }
 }
 
 // ==================== 主函数 ====================
@@ -210,6 +219,22 @@ int main(void) {
     // 清理资源
     test_framework_cleanup();
 
-    // 返回测试结果
-    return UNITY_END();
+    // 获取测试结果
+    int result = UNITY_END();
+
+    // 打印失败用例汇总
+    if (failed_test_count > 0) {
+        printf("\n========================================\n");
+        printf("           失败用例汇总\n");
+        printf("========================================\n");
+        for (int i = 0; i < failed_test_count; i++) {
+            printf("[FAIL] %s\n", failed_tests[i]);
+        }
+        if (failed_test_count == MAX_FAILED_TESTS) {
+            printf("... (更多失败未显示)\n");
+        }
+        printf("========================================\n");
+    }
+
+    return result;
 }
