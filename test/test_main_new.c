@@ -61,6 +61,7 @@ extern void test_max_buttons_boundary(void);
 extern void test_too_many_buttons(void);
 extern void test_button_param_null(void);
 extern void test_combo_button_param_null(void);
+extern void test_combo_button_keys_invalid(void);
 
 // 初始化测试
 extern void test_successful_initialization(void);
@@ -188,6 +189,7 @@ int main(void) {
     RUN_TEST(test_too_many_buttons);
     RUN_TEST(test_button_param_null);
     RUN_TEST(test_combo_button_param_null);
+    RUN_TEST(test_combo_button_keys_invalid);
 
     printf("\n【初始化配置测试】\n");
     RUN_TEST(test_successful_initialization);

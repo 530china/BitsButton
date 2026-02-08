@@ -20,6 +20,22 @@ typedef state_bits_type_t button_mask_type_t;
 // Maximum number of buttons based on mask type size
 #define BITS_BTN_MAX_BUTTONS      (sizeof(button_mask_type_t) * 8)
 
+/**
+ * @brief BitsButton error codes for initialization and operation results.
+ *        All error codes are negative values, with 0 indicating success.
+ */
+typedef enum {
+    BITS_BTN_OK                       =  0,  // Success
+    BITS_BTN_ERR_INVALID_COMBO_ID     = -1,  // Combo button references an invalid single button ID
+    BITS_BTN_ERR_INVALID_PARAM        = -2,  // Invalid parameter (config/btns/read_func is NULL, etc.)
+    BITS_BTN_ERR_TOO_MANY_COMBOS      = -3,  // Number of combo buttons exceeds BITS_BTN_MAX_COMBO_BUTTONS
+    BITS_BTN_ERR_BUFFER_OPS_NULL      = -4,  // User buffer mode requires setting buffer ops before init
+    BITS_BTN_ERR_TOO_MANY_BUTTONS     = -5,  // Number of buttons exceeds BITS_BTN_MAX_BUTTONS
+    BITS_BTN_ERR_BTN_PARAM_NULL       = -6,  // Single button has NULL param pointer
+    BITS_BTN_ERR_COMBO_PARAM_NULL     = -7,  // Combo button has NULL param pointer
+    BITS_BTN_ERR_COMBO_KEYS_INVALID   = -8,  // Combo button keys config invalid (key_single_ids is NULL or key_count is 0)
+} bits_btn_error_t;
+
 
 typedef enum {
     BTN_STATE_IDLE              ,
@@ -172,15 +188,16 @@ typedef struct
   *
   * @param  config: Pointer to the configuration structure containing all initialization parameters.
   *
-  * @retval Status code indicating the result of the initialization:
-  *         - 0: Success. All parameters are valid, and the button system is initialized.
-  *         - -1: Invalid key ID in combination button configuration.
-  *         - -2: Invalid input parameters. Returned if config is NULL or required fields are missing.
-  *         - -3: Too many combo buttons. The number of combo buttons exceeds BITS_BTN_MAX_COMBO_BUTTONS.
-  *         - -4: User buffer mode requires setting buffer ops before init.
-  *         - -5: Too many buttons. The number of buttons exceeds BITS_BTN_MAX_BUTTONS.
-  *         - -6: Button param is NULL. A single button has NULL param pointer.
-  *         - -7: Combo button param is NULL. A combo button has NULL param pointer.
+  * @retval bits_btn_error_t Status code indicating the result of the initialization:
+  *         - BITS_BTN_OK (0): Success. All parameters are valid, and the button system is initialized.
+  *         - BITS_BTN_ERR_INVALID_COMBO_ID (-1): Invalid key ID in combination button configuration.
+  *         - BITS_BTN_ERR_INVALID_PARAM (-2): Invalid input parameters (config/btns/read_func is NULL, etc.).
+  *         - BITS_BTN_ERR_TOO_MANY_COMBOS (-3): Too many combo buttons (exceeds BITS_BTN_MAX_COMBO_BUTTONS).
+  *         - BITS_BTN_ERR_BUFFER_OPS_NULL (-4): User buffer mode requires setting buffer ops before init.
+  *         - BITS_BTN_ERR_TOO_MANY_BUTTONS (-5): Too many buttons (exceeds BITS_BTN_MAX_BUTTONS).
+  *         - BITS_BTN_ERR_BTN_PARAM_NULL (-6): A single button has NULL param pointer.
+  *         - BITS_BTN_ERR_COMBO_PARAM_NULL (-7): A combo button has NULL param pointer.
+  *         - BITS_BTN_ERR_COMBO_KEYS_INVALID (-8): Combo button keys config invalid (key_single_ids is NULL or key_count is 0).
   */
 int32_t bits_button_init(const bits_btn_config_t *config);
 

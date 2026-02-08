@@ -14,14 +14,15 @@ int32_t bits_button_init(const bits_btn_config_t *config);
 - `config`: 指向配置结构体的指针，包含所有初始化参数
 
 **返回值：** 
-- 0: 成功
-- -1: 组合按键配置中存在无效的按键ID
-- -2: 输入参数无效
-- -3: 组合按键过多
-- -4: 需要外部缓冲区操作但未设置
-- -5: 按键数量过多
-- -6: 单按键参数无效
-- -7: 组合按键参数无效
+- `BITS_BTN_OK` (0): 成功
+- `BITS_BTN_ERR_INVALID_COMBO_ID` (-1): 组合按键配置中存在无效的按键ID
+- `BITS_BTN_ERR_INVALID_PARAM` (-2): 输入参数无效（config/btns/read_func 为 NULL 等）
+- `BITS_BTN_ERR_TOO_MANY_COMBOS` (-3): 组合按键数量超过 BITS_BTN_MAX_COMBO_BUTTONS
+- `BITS_BTN_ERR_BUFFER_OPS_NULL` (-4): 用户缓冲区模式需要先设置 buffer ops
+- `BITS_BTN_ERR_TOO_MANY_BUTTONS` (-5): 按键数量超过 BITS_BTN_MAX_BUTTONS
+- `BITS_BTN_ERR_BTN_PARAM_NULL` (-6): 单按键的 param 指针为 NULL
+- `BITS_BTN_ERR_COMBO_PARAM_NULL` (-7): 组合按键的 param 指针为 NULL
+- `BITS_BTN_ERR_COMBO_KEYS_INVALID` (-8): 组合按键 keys 配置无效（key_single_ids 为 NULL 或 key_count 为 0）
 
 ---
 
@@ -200,6 +201,22 @@ typedef struct button_obj_combo
 - `BTN_STATE_RELEASE`: 抬起
 - `BTN_STATE_RELEASE_WINDOW`: 释放窗口
 - `BTN_STATE_FINISH`: 完成
+
+## 错误码枚举
+
+```c
+typedef enum {
+    BITS_BTN_OK                       =  0,  // 成功
+    BITS_BTN_ERR_INVALID_COMBO_ID     = -1,  // 组合按键中存在无效的按键ID
+    BITS_BTN_ERR_INVALID_PARAM        = -2,  // 无效参数（config/btns/read_func为NULL等）
+    BITS_BTN_ERR_TOO_MANY_COMBOS      = -3,  // 组合按键数量超限
+    BITS_BTN_ERR_BUFFER_OPS_NULL      = -4,  // 用户缓冲区模式需要先设置buffer ops
+    BITS_BTN_ERR_TOO_MANY_BUTTONS     = -5,  // 按键数量超限
+    BITS_BTN_ERR_BTN_PARAM_NULL       = -6,  // 单按键param为NULL
+    BITS_BTN_ERR_COMBO_PARAM_NULL     = -7,  // 组合按键param为NULL
+    BITS_BTN_ERR_COMBO_KEYS_INVALID   = -8,  // 组合按键keys配置无效
+} bits_btn_error_t;
+```
 
 ## 使用示例
 
