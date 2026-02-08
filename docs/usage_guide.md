@@ -402,3 +402,30 @@ void low_power_handler(void) {
 3. **激活电平**：根据硬件电路确定（上拉电阻用1，下拉电阻用0）
 4. **参数调优**：根据实际用户体验调整时间参数
 5. **错误处理**：在初始化函数调用后检查返回值
+
+### 错误处理示例
+
+初始化函数返回 `bits_btn_error_t` 枚举类型，建议使用枚举常量进行错误处理：
+
+```c
+int32_t ret = bits_button_init(&config);
+if (ret != BITS_BTN_OK) {
+    switch (ret) {
+        case BITS_BTN_ERR_INVALID_PARAM:
+            printf("配置参数无效\n");
+            break;
+        case BITS_BTN_ERR_TOO_MANY_BUTTONS:
+            printf("按键数量超限\n");
+            break;
+        case BITS_BTN_ERR_BTN_PARAM_NULL:
+            printf("按键参数为空\n");
+            break;
+        case BITS_BTN_ERR_COMBO_KEYS_INVALID:
+            printf("组合按键配置无效\n");
+            break;
+        default:
+            printf("初始化失败，错误码: %d\n", ret);
+            break;
+    }
+}
+```

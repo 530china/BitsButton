@@ -404,7 +404,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
 
     if (config == NULL)
     {
-        return -2;
+        return BITS_BTN_ERR_INVALID_PARAM;
     }
 
     debug_printf = config->bits_btn_debug_printf;
@@ -416,14 +416,14 @@ int32_t bits_button_init(const bits_btn_config_t *config)
     {
         if(debug_printf)
             debug_printf("Invalid init parameters !\n");
-        return -2;
+        return BITS_BTN_ERR_INVALID_PARAM;
     }
 
     if (config->btns_cnt > BITS_BTN_MAX_BUTTONS)
     {
         if (debug_printf)
             debug_printf("Error: Too many buttons (%d > max %d)\n", config->btns_cnt, (int)BITS_BTN_MAX_BUTTONS);
-        return -5;
+        return BITS_BTN_ERR_TOO_MANY_BUTTONS;
     }
 
     memset(button, 0, sizeof(bits_button_t));
@@ -442,7 +442,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
             debug_printf("Error: Too many combo buttons (%d > max %d)\n",
                          config->btns_combo_cnt, BITS_BTN_MAX_COMBO_BUTTONS);
         }
-        return -3;
+        return BITS_BTN_ERR_TOO_MANY_COMBOS;
     }
 
     // Check single button param pointers
@@ -452,7 +452,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
         {
             if (debug_printf)
                 debug_printf("Error: Button[%d] param is NULL\n", i);
-            return -6;
+            return BITS_BTN_ERR_BTN_PARAM_NULL;
         }
     }
 
@@ -463,7 +463,22 @@ int32_t bits_button_init(const bits_btn_config_t *config)
         {
             if (debug_printf)
                 debug_printf("Error: Combo button[%d] param is NULL\n", i);
-            return -7;
+            return BITS_BTN_ERR_COMBO_PARAM_NULL;
+        }
+    }
+
+    // Check combo button keys configuration validity
+    for (uint16_t i = 0; i < config->btns_combo_cnt; i++)
+    {
+        if (config->btns_combo[i].key_single_ids == NULL ||
+            config->btns_combo[i].key_count == 0)
+        {
+            if (debug_printf)
+                debug_printf("Error: Combo button[%d] has invalid keys config (key_single_ids=%p, key_count=%d)\n",
+                             i,
+                             (void*)config->btns_combo[i].key_single_ids,
+                             config->btns_combo[i].key_count);
+            return BITS_BTN_ERR_COMBO_KEYS_INVALID;
         }
     }
 
@@ -479,7 +494,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
             {
                 if(debug_printf)
                     debug_printf("Error, get_btn_index failed! \n");
-                return -1; // Invalid ID
+                return BITS_BTN_ERR_INVALID_COMBO_ID;
             }
             combo->combo_mask |= ((button_mask_type_t)1UL << idx);
         }
@@ -492,7 +507,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
     if (bits_btn_buffer_ops == NULL)
     {
         if (debug_printf) debug_printf("Error: External buffer mode requires setting buffer ops!\n");
-        return -4;
+        return BITS_BTN_ERR_BUFFER_OPS_NULL;
     }
 #endif
 
@@ -501,7 +516,7 @@ int32_t bits_button_init(const bits_btn_config_t *config)
         bits_btn_buffer_ops->init();
     }
 
-    return 0;
+    return BITS_BTN_OK;
 }
 
 /**

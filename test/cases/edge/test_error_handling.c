@@ -192,8 +192,9 @@ void test_resource_exhaustion(void) {
     };
     int32_t result = bits_button_init(&config);
 
-    // 根据实现，可能成功或失败
-    printf("超过最大组合按键数量的初始化结果: %d\n", result);
+    // 应返回组合按键数量超限错误
+    TEST_ASSERT_EQUAL(-3, result);
+    printf("超过最大组合按键数量的初始化结果: %d (正确返回错误码 -3)\n", result);
 
     // 测试缓冲区资源耗尽（在buffer_operations.c中已测试）
     printf("资源耗尽测试通过: 正确处理资源限制\n");
@@ -308,4 +309,67 @@ void test_combo_button_param_null(void) {
     TEST_ASSERT_EQUAL(-7, result);  // 应返回组合按钮 param 为空错误
 
     printf("组合按钮 param 为 NULL 测试通过: 正确返回错误码 -7\n");
+}
+
+void test_combo_button_keys_invalid(void) {
+    printf("\n=== 测试组合按钮 keys 配置无效 ===\n");
+
+    static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
+
+    // 创建单按钮
+    button_obj_t buttons[] = {
+        BITS_BUTTON_INIT(1, 1, &param),
+        BITS_BUTTON_INIT(2, 1, &param)
+    };
+
+    // 测试1: key_single_ids 为 NULL
+    printf("测试1: key_single_ids 为 NULL\n");
+    button_obj_combo_t combo1 = {
+        .suppress = 1,
+        .key_count = 2,
+        .key_single_ids = NULL,  // 无效配置
+        .combo_mask = 0,
+        .btn = BITS_BUTTON_INIT(100, 1, &param)
+    };
+
+    bits_btn_config_t config1 = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo1,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+
+    int32_t result = bits_button_init(&config1);
+    TEST_ASSERT_EQUAL(-8, result);  // 应返回组合按钮 keys 配置无效错误
+    printf("key_single_ids 为 NULL: 正确返回错误码 -8\n");
+
+    // 测试2: key_count 为 0
+    printf("测试2: key_count 为 0\n");
+    static uint16_t combo_keys[] = {1, 2};
+    button_obj_combo_t combo2 = {
+        .suppress = 1,
+        .key_count = 0,  // 无效配置
+        .key_single_ids = combo_keys,
+        .combo_mask = 0,
+        .btn = BITS_BUTTON_INIT(100, 1, &param)
+    };
+
+    bits_btn_config_t config2 = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo2,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+
+    result = bits_button_init(&config2);
+    TEST_ASSERT_EQUAL(-8, result);  // 应返回组合按钮 keys 配置无效错误
+    printf("key_count 为 0: 正确返回错误码 -8\n");
+
+    printf("组合按钮 keys 配置无效测试通过: 正确返回错误码 -8\n");
 }
