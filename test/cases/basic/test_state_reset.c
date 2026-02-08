@@ -17,10 +17,15 @@ void test_state_reset_functionality(void) {
     // 1. 初始化按键系统
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    bits_button_init(&button, 1, NULL, 0, 
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
     printf("✓ 按键系统初始化完成\n");
     
     // 2. 模拟按键进入长按状态
@@ -77,10 +82,17 @@ void test_combo_button_reset(void) {
     };
     
     // 3. 初始化按键系统（包含组合按键）
-    int32_t init_result = bits_button_init(buttons, 2, &combo_button, 1,
-                                          test_framework_mock_read_button, 
-                                          test_framework_event_callback, 
-                                          test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .btns_combo = &combo_button,
+        .btns_combo_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t init_result = bits_button_init(&config);
+    
     TEST_ASSERT_EQUAL_INT32(0, init_result);
     printf("✓ 按键系统（含组合按键）初始化完成\n");
     

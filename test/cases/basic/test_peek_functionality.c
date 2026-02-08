@@ -30,10 +30,14 @@ void test_peek_functionality(void) {
     button_obj_t button = CREATE_TEST_BUTTON(1, 1, &param);
     
     // 初始化按键系统
-    int32_t ret = bits_button_init(&button, 1, NULL, 0, 
-                                   test_framework_mock_read_button, 
-                                   test_framework_event_callback, 
-                                   test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t ret = bits_button_init(&config);
     TEST_ASSERT_EQUAL_MESSAGE(0, ret, "按键初始化应成功");
     
     // 验证初始状态下peek应该返回false（缓冲区为空）
@@ -90,10 +94,14 @@ void test_peek_vs_get_behavior(void) {
     button_obj_t button = CREATE_TEST_BUTTON(2, 1, &param);
     
     // 初始化按键系统
-    int32_t ret = bits_button_init(&button, 1, NULL, 0, 
-                                   test_framework_mock_read_button, 
-                                   test_framework_event_callback, 
-                                   test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t ret = bits_button_init(&config);
     TEST_ASSERT_EQUAL_MESSAGE(0, ret, "按键初始化应成功");
     
     // 模拟一个按键事件

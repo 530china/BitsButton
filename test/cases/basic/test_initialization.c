@@ -33,10 +33,14 @@ void test_successful_initialization(void) {
     };
     
     // 测试成功初始化
-    int32_t result = bits_button_init(buttons, 3, NULL, 0,
-                                      test_framework_mock_read_button, 
-                                      test_framework_event_callback, 
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 3,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
     
     // 应该返回成功
     TEST_ASSERT_EQUAL(0, result);
@@ -60,10 +64,14 @@ void test_different_active_levels(void) {
         BITS_BUTTON_INIT(2, 1, &param)   // 也使用高电平激活，确保测试稳定
     };
     
-    bits_button_init(buttons, 2, NULL, 0,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = 2,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试第一个按键
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
@@ -95,10 +103,15 @@ void test_custom_parameters(void) {
     };
     
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &custom_param);
-    bits_button_init(&button, 1, NULL, 0,
-                     test_framework_mock_read_button, 
-                     test_framework_event_callback, 
-                     test_framework_log_printf);
+    
+    bits_btn_config_t config = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    bits_button_init(&config);
 
     // 测试自定义短按时间 - 使用标准点击
     mock_button_click(1, STANDARD_CLICK_TIME_MS);
@@ -117,10 +130,15 @@ void test_custom_parameters(void) {
         test_framework_clear_events();
         static const bits_btn_obj_param_t default_param = TEST_DEFAULT_PARAM();
         button_obj_t default_button = BITS_BUTTON_INIT(1, 1, &default_param);
-        bits_button_init(&default_button, 1, NULL, 0,
-                         test_framework_mock_read_button, 
-                         test_framework_event_callback, 
-                         test_framework_log_printf);
+        
+        bits_btn_config_t def_config = {
+            .btns = &default_button,
+            .btns_cnt = 1,
+            .read_button_level_func = test_framework_mock_read_button,
+            .bits_btn_result_cb = test_framework_event_callback,
+            .bits_btn_debug_printf = test_framework_log_printf
+        };
+        bits_button_init(&def_config);
         
         mock_button_click(1, STANDARD_CLICK_TIME_MS);
         time_simulate_time_window_end();
@@ -148,10 +166,14 @@ void test_multiple_button_initialization(void) {
     }
     
     // 初始化所有按键
-    int32_t result = bits_button_init(buttons, MAX_TEST_BUTTONS, NULL, 0,
-                                      test_framework_mock_read_button, 
-                                      test_framework_event_callback, 
-                                      test_framework_log_printf);
+    bits_btn_config_t config = {
+        .btns = buttons,
+        .btns_cnt = MAX_TEST_BUTTONS,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t result = bits_button_init(&config);
     
     TEST_ASSERT_EQUAL(0, result);
     
@@ -181,10 +203,14 @@ void test_callback_functions(void) {
     
     // 1. 只有事件回调，没有调试回调
     printf("测试场景1: 只有事件回调，没有调试回调\n");
-    int32_t init_result1 = bits_button_init(&button, 1, NULL, 0,
-                                           test_framework_mock_read_button, 
-                                           test_framework_event_callback, 
-                                           NULL);  // 无调试回调
+    bits_btn_config_t config1 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = NULL
+    };
+    int32_t init_result1 = bits_button_init(&config1);
     
     TEST_ASSERT_EQUAL_MESSAGE(0, init_result1, "只有事件回调的初始化应该成功");
     
@@ -200,10 +226,14 @@ void test_callback_functions(void) {
     
     // 2. 没有事件回调，只有调试回调
     printf("测试场景2: 没有事件回调，只有调试回调\n");
-    int32_t init_result2 = bits_button_init(&button, 1, NULL, 0,
-                                           test_framework_mock_read_button, 
-                                           NULL,  // 无事件回调
-                                           test_framework_log_printf);
+    bits_btn_config_t config2 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = NULL,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t init_result2 = bits_button_init(&config2);
     
     TEST_ASSERT_EQUAL_MESSAGE(0, init_result2, "只有调试回调的初始化应该成功");
     
@@ -220,10 +250,14 @@ void test_callback_functions(void) {
     
     // 3. 都没有回调
     printf("测试场景3: 都没有回调\n");
-    int32_t init_result3 = bits_button_init(&button, 1, NULL, 0,
-                                           test_framework_mock_read_button, 
-                                           NULL,  // 无事件回调
-                                           NULL); // 无调试回调
+    bits_btn_config_t config3 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = NULL,
+        .bits_btn_debug_printf = NULL
+    };
+    int32_t init_result3 = bits_button_init(&config3);
     
     TEST_ASSERT_EQUAL_MESSAGE(0, init_result3, "无回调的初始化应该成功");
     
@@ -240,10 +274,14 @@ void test_callback_functions(void) {
     
     // 4. 验证读取按键函数为NULL的错误处理
     printf("测试场景4: 读取按键函数为NULL的错误处理\n");
-    int32_t init_result4 = bits_button_init(&button, 1, NULL, 0,
-                                           NULL,  // 无读取函数 - 这应该失败
-                                           test_framework_event_callback, 
-                                           test_framework_log_printf);
+    bits_btn_config_t config4 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = NULL,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t init_result4 = bits_button_init(&config4);
     
     TEST_ASSERT_NOT_EQUAL_MESSAGE(0, init_result4, 
                                  "读取按键函数为NULL时初始化应该失败");
@@ -251,10 +289,14 @@ void test_callback_functions(void) {
     
     // 5. 恢复正常配置进行最终验证
     printf("测试场景5: 恢复完整回调配置\n");
-    int32_t init_result5 = bits_button_init(&button, 1, NULL, 0,
-                                           test_framework_mock_read_button, 
-                                           test_framework_event_callback, 
-                                           test_framework_log_printf);
+    bits_btn_config_t config5 = {
+        .btns = &button,
+        .btns_cnt = 1,
+        .read_button_level_func = test_framework_mock_read_button,
+        .bits_btn_result_cb = test_framework_event_callback,
+        .bits_btn_debug_printf = test_framework_log_printf
+    };
+    int32_t init_result5 = bits_button_init(&config5);
     
     TEST_ASSERT_EQUAL_MESSAGE(0, init_result5, "完整回调配置的初始化应该成功");
     
@@ -267,4 +309,3 @@ void test_callback_functions(void) {
     
     printf("✓ 回调函数测试通过: 所有回调组合都经过验证\n");
 }
-
