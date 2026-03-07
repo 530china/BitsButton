@@ -11,6 +11,43 @@ BitsButton是一个轻量级、高性能的按键检测库，支持单按键和�
 - **C标准兼容**：支持C89/C99/C11
 - **轻量化**：RAM占用少于20字节/按键
 
+## 核心状态机运行机制
+
+BitsButton 的核心是一个基于时间窗口（Time Window）的有限状态机。理解状态的流转机制有助于您正确使用各类按键事件（尤其是 `RELEASE` 与 `FINISH` 的区别）。
+
+### 状态流转图
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE : 初始化 / 重置
+    
+    IDLE --> PRESSED : 物理按下持续时间 > short_press_time_ms\n(抛出 BTN_EVENT_PRESSED)
+    
+    PRESSED --> LONG_PRESS : 按下状态保持 > long_press_start_time_ms\n(抛出 BTN_EVENT_LONG_PRESS)
+    LONG_PRESS --> LONG_PRESS : 每隔 long_press_period_trigger_ms\n(循环抛出 BTN_EVENT_LONG_PRESS)
+    
+    PRESSED --> RELEASE : 物理松开\n(抛出 BTN_EVENT_RELEASE)
+    LONG_PRESS --> RELEASE : 物理松开\n(抛出 BTN_EVENT_RELEASE)
+    
+    RELEASE --> RELEASE_WINDOW : 进入判定等待窗口\n(等待可能的下一次双击/连击)
+    
+    RELEASE_WINDOW --> PRESSED : 窗口期内再次物理按下\n(连击计数 + 1)
+    
+    RELEASE_WINDOW --> FINISH : 窗口期超时无动作 (time_window_time_ms)\n(抛出 BTN_EVENT_FINISH，结算连击值)
+    FINISH --> IDLE : 本次按键生命周期结束
+```
+
+### 关键机制说明
+
+1. **消抖处理（Debounce）**：
+   - 物理按下必须持续超过 `short_press_time_ms` 才会进入 `PRESSED` 状态。小于此时间的抖动会被丢弃。
+2. **多击判定窗口（Release Window）**：
+   - 当用户松开按键（`RELEASE`）时，系统**不会立即判定动作结束**，而是进入等待窗口。
+   - 只有在 `time_window_time_ms` 时间内没有新的按下动作，系统才会抛出终结事件 `BTN_EVENT_FINISH`。
+   - **如果您想检测"双击"或"三连击"，请务必在 `BTN_EVENT_FINISH` 事件中读取 `key_value`。**
+3. **长按周期触发（Long Press Hold）**：
+   - 进入长按状态后，只要不松手，系统会每隔 `long_press_period_trigger_ms` 抛出一次长按事件。
+
 ## 快速开始
 
 ### 1. 集成库文件
