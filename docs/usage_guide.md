@@ -17,24 +17,29 @@ BitsButton 的核心是一个基于时间窗口（Time Window）的有限状态�
 
 ### 状态流转图
 
-```mermaid
-stateDiagram-v2
-    [*] --> IDLE : 初始化 / 重置
-    
-    IDLE --> PRESSED : 物理按下持续时间 > short_press_time_ms\n(抛出 BTN_EVENT_PRESSED)
-    
-    PRESSED --> LONG_PRESS : 按下状态保持 > long_press_start_time_ms\n(抛出 BTN_EVENT_LONG_PRESS)
-    LONG_PRESS --> LONG_PRESS : 每隔 long_press_period_trigger_ms\n(循环抛出 BTN_EVENT_LONG_PRESS)
-    
-    PRESSED --> RELEASE : 物理松开\n(抛出 BTN_EVENT_RELEASE)
-    LONG_PRESS --> RELEASE : 物理松开\n(抛出 BTN_EVENT_RELEASE)
-    
-    RELEASE --> RELEASE_WINDOW : 进入判定等待窗口\n(等待可能的下一次双击/连击)
-    
-    RELEASE_WINDOW --> PRESSED : 窗口期内再次物理按下\n(连击计数 + 1)
-    
-    RELEASE_WINDOW --> FINISH : 窗口期超时无动作 (time_window_time_ms)\n(抛出 BTN_EVENT_FINISH，结算连击值)
-    FINISH --> IDLE : 本次按键生命周期结束
+```text
++--------------------------------------------------------------------------------------------+
+|                                                                                            |
+|  [IDLE]  -------- Press --------> [PRESSED]  ---- Long Press --->  [LONG_PRESS]            |
+|    ^ ^                                |                                  |                 |
+|    | |                                |                                  | (Hold Loop)     |
+|    | |                             Release                            Release              |
+|    | |                                |                                  |                 |
+|    | |                                v                                  |                 |
+|    | |                            [RELEASE] <----------------------------+                 |
+|    | |                                |                                                    |
+|    | |                            Immediate                                                |
+|    | |                                v                                                    |
+|    | |  Press in window       [RELEASE_WINDOW]                                             |
+|    | |  (state_bits kept)             |                                                    |
+|    | +--------------------------------+                                                    |
+|    |                                  |                                                    |
+|    |                              Timeout                                                  |
+|    |                                  v                                                    |
+|    +------- Sequence Ends ------- [FINISH]                                                 |
+|             (state_bits cleared)                                                           |
+|                                                                                            |
++--------------------------------------------------------------------------------------------+
 ```
 
 ### 关键机制说明
