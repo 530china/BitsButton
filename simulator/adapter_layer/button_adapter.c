@@ -46,23 +46,23 @@ int my_log_printf(const char* format, ...) {
     return result;
 }
 
-static const bits_btn_obj_param_t defaul_param = {.long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
                                                   .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 button_obj_t btns[] =
 {
-    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &defaul_param),
-    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &defaul_param),
-    BITS_BUTTON_INIT(USER_BUTTON_2, 1, &defaul_param),
-    BITS_BUTTON_INIT(USER_BUTTON_3, 1, &defaul_param),
-    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &defaul_param),
+    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &default_param),
+    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &default_param),
+    BITS_BUTTON_INIT(USER_BUTTON_2, 1, &default_param),
+    BITS_BUTTON_INIT(USER_BUTTON_3, 1, &default_param),
+    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &default_param),
 };
 
 button_obj_combo_t btns_combo[] =
 {
-    BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_0, 1, &defaul_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}), 2, 1),
-    BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_1, 1, &defaul_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1, USER_BUTTON_3}), 3, 1),
+    BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_0, 1, &default_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}), 2, 1),
+    BITS_BUTTON_COMBO_INIT(USER_BUTTON_COMBO_1, 1, &default_param, ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1, USER_BUTTON_3}), 3, 1),
 };
 
 void bits_btn_result_cb(struct button_obj_t *btn, struct bits_btn_result result)

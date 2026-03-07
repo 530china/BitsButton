@@ -686,7 +686,7 @@ static void bits_btn_report_event(struct button_obj_t* button, bits_btn_result_t
 
 #ifndef BITS_BTN_DISABLE_BUFFER
     uint8_t is_user_result_filter_exist = (bits_btn_result_user_filter_cb != NULL);
-    uint8_t default_result_filter_triger = (result->event == BTN_EVENT_LONG_PRESS) || (result->event == BTN_EVENT_FINISH);
+    uint8_t default_result_filter_trigger = (result->event == BTN_EVENT_LONG_PRESS) || (result->event == BTN_EVENT_FINISH);
 
     if (bits_btn_buffer_ops && bits_btn_buffer_ops->write)
     {
@@ -698,7 +698,7 @@ static void bits_btn_report_event(struct button_obj_t* button, bits_btn_result_t
         }
         else
         {
-            should_write_to_buffer = default_result_filter_triger;
+            should_write_to_buffer = default_result_filter_trigger;
         }
 
         if (should_write_to_buffer)
@@ -768,7 +768,7 @@ static void update_button_state_machine(struct button_obj_t* button, uint8_t btn
                 button->long_press_period_trigger_cnt = 0;
                 button->current_state = BTN_STATE_RELEASE;
             }
-            else if(time_diff * BITS_BTN_TICKS_INTERVAL > button->param->long_press_period_triger_ms)
+            else if(time_diff * BITS_BTN_TICKS_INTERVAL > button->param->long_press_period_trigger_ms)
             {
                 button->state_entry_time = current_time;
                 button->long_press_period_trigger_cnt++;

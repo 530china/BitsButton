@@ -127,7 +127,7 @@ void test_long_press_event(void) {
     time_simulate_time_window_end();
 
     // 验证长按开始事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESS_START_KV);
     printf("长按测试通过\n");
 }
 
@@ -138,7 +138,7 @@ void test_long_press_hold_event(void) {
     
     // 创建按键对象，设置较短的长按周期
     static const bits_btn_obj_param_t param = {
-        .long_press_period_triger_ms = 500,
+        .long_press_period_trigger_ms = 500,
         .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
         .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
         .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
