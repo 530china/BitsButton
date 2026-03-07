@@ -31,14 +31,14 @@
 
 // ==================== 测试参数宏 ====================
 #define TEST_DEFAULT_PARAM() { \
-    .long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS, \
+    .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS, \
     .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS, \
     .short_press_time_ms = BITS_BTN_SHORT_TIME_MS, \
     .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS \
 }
 
 #define TEST_FAST_LONG_PRESS_PARAM() { \
-    .long_press_period_triger_ms = 500, \
+    .long_press_period_trigger_ms = 500, \
     .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS, \
     .short_press_time_ms = BITS_BTN_SHORT_TIME_MS, \
     .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS \
@@ -62,7 +62,7 @@
     ASSERT_EVENT_WITH_VALUE(key_id, BTN_EVENT_FINISH, 0b101010)  // 三连击: 010 + 010 + 10
 
 #define VERIFY_LONG_PRESS_START(key_id) \
-    ASSERT_EVENT_WITH_VALUE(key_id, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV)
+    ASSERT_EVENT_WITH_VALUE(key_id, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESS_START_KV)
 
 #define VERIFY_SINGLE_THEN_LONG_PRESS(key_id) \
     ASSERT_EVENT_WITH_VALUE(key_id, BTN_EVENT_LONG_PRESS, BITS_BTN_SINGLE_CLICK_THEN_LONG_PRESS_KV)

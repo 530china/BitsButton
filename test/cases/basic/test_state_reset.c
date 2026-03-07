@@ -35,7 +35,7 @@ void test_state_reset_functionality(void) {
     time_simulate_long_press_threshold();
     
     // 验证长按事件
-    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    ASSERT_EVENT_WITH_VALUE(1, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESS_START_KV);
     printf("✓ 长按状态确认: 按键ID=1, 事件=2\n");
     
     // 3. 调用状态重置函数
@@ -104,7 +104,7 @@ void test_combo_button_reset(void) {
     time_simulate_long_press_threshold();
     
     // 验证组合按键长按事件
-    ASSERT_EVENT_WITH_VALUE(100, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESEE_START_KV);
+    ASSERT_EVENT_WITH_VALUE(100, BTN_EVENT_LONG_PRESS, BITS_BTN_LONG_PRESS_START_KV);
     printf("✓ 组合按键长按状态确认: 按键ID=100, 事件=2\n");
     
     // 5. 调用状态重置函数

@@ -113,7 +113,7 @@ void test_long_press_period_boundary(void) {
     ASSERT_EVENT_EXISTS(1, BTN_EVENT_LONG_PRESS);
     
     // 等待长按周期触发 - 需要额外的时间来触发周期事件
-    time_simulate_pass(param.long_press_period_triger_ms + 50);
+    time_simulate_pass(param.long_press_period_trigger_ms + 50);
     
     // 检查是否有长按保持事件（long_press_period_trigger_cnt > 0）
     bits_btn_result_t* events = test_framework_get_events();

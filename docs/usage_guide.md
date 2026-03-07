@@ -57,16 +57,16 @@ typedef enum
 } user_button_t;
 
 // 2. 定义按键参数、单按键实例、组合按键实例
-static const bits_btn_obj_param_t defaul_param = {.long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
                                                   .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 
 button_obj_t btns[] =
 {
-    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &defaul_param),
-    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &defaul_param),
-    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &defaul_param),
+    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &default_param),
+    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &default_param),
+    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &default_param),
 };
 
 button_obj_combo_t btns_combo[] =
@@ -74,7 +74,7 @@ button_obj_combo_t btns_combo[] =
     BITS_BUTTON_COMBO_INIT(
         USER_BUTTON_COMBO_0,    // 组合键ID
         1,                      // 有效电平
-        &defaul_param,          // 参数配置
+        &default_param,          // 参数配置
         ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}),   // 组合按键成员
         2,                      // 组合键成员数量
         1),                     // 抑制单键事件
@@ -228,15 +228,15 @@ typedef enum
 } user_button_t;
 
 // 2. 定义按键参数、单按键实例、组合按键实例
-static const bits_btn_obj_param_t defaul_param = {.long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
                                                   .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 button_obj_t btns[] =
 {
-    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &defaul_param),
-    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &defaul_param),
-    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &defaul_param),
+    BITS_BUTTON_INIT(USER_BUTTON_0, 1, &default_param),
+    BITS_BUTTON_INIT(USER_BUTTON_1, 1, &default_param),
+    // BITS_BUTTON_INIT(USER_BUTTON_2, 1, &default_param),
 };
 
 button_obj_combo_t btns_combo[] =
@@ -244,7 +244,7 @@ button_obj_combo_t btns_combo[] =
     BITS_BUTTON_COMBO_INIT(
         USER_BUTTON_COMBO_0,    // 组合键ID
         1,                      // 有效电平
-        &defaul_param,          // 参数配置
+        &default_param,          // 参数配置
         ((uint16_t[]){USER_BUTTON_0, USER_BUTTON_1}),   // 组合按键成员
         2,                      // 组合键成员数量
         1),                     // 抑制单键事件

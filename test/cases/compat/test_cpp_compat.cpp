@@ -13,7 +13,7 @@ namespace test_namespace {
         const bits_btn_obj_param_t param = {
             .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-            .long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+            .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
         };
 
@@ -34,7 +34,7 @@ public:
         param = {
             .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-            .long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+            .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
         };
 
@@ -95,7 +95,7 @@ int main() {
         const bits_btn_obj_param_t test_param = {
             .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-            .long_press_period_triger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+            .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
         };
 
@@ -129,7 +129,7 @@ int main() {
         uint32_t time_values[] = {
             BITS_BTN_SHORT_TIME_MS,
             BITS_BTN_LONG_PRESS_START_TIME_MS,
-            BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS,
+            BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             BITS_BTN_TIME_WINDOW_TIME_MS,
             BITS_BTN_DEBOUNCE_TIME_MS,
             BITS_BTN_TICKS_INTERVAL
@@ -141,9 +141,9 @@ int main() {
             BITS_BTN_DOUBLE_CLICK_KV,
             BITS_BTN_SINGLE_CLICK_THEN_LONG_PRESS_KV,
             BITS_BTN_DOUBLE_CLICK_THEN_LONG_PRESS_KV,
-            BITS_BTN_LONG_PRESEE_START_KV,
-            BITS_BTN_LONG_PRESEE_HOLD_KV,
-            BITS_BTN_LONG_PRESEE_HOLD_END_KV
+            BITS_BTN_LONG_PRESS_START_KV,
+            BITS_BTN_LONG_PRESS_HOLD_KV,
+            BITS_BTN_LONG_PRESS_HOLD_END_KV
         };
         (void)time_values;
         (void)key_values;

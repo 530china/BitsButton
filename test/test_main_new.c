@@ -75,40 +75,6 @@ extern void test_peek_functionality(void);
 extern void test_peek_vs_get_behavior(void);
 extern void test_peek_disabled_buffer_mode(void);
 
-// ==================== 测试套件设置函数 ====================
-
-void basic_tests_setup(void) {
-    test_framework_reset();
-}
-
-void basic_tests_teardown(void) {
-    // 基础测试清理
-}
-
-void combo_tests_setup(void) {
-    test_framework_reset();
-}
-
-void combo_tests_teardown(void) {
-    // 组合测试清理
-}
-
-void edge_tests_setup(void) {
-    test_framework_reset();
-}
-
-void edge_tests_teardown(void) {
-    // 边界测试清理
-}
-
-void performance_tests_setup(void) {
-    test_framework_reset();
-}
-
-void performance_tests_teardown(void) {
-    // 性能测试清理
-}
-
 // ==================== Unity标准设置函数 ====================
 
 // 定义最大失败记录数（200个足够容纳所有测试用例）

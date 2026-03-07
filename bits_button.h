@@ -50,13 +50,13 @@ typedef enum {
 #endif
 
 #ifndef BITS_BTN_DEBOUNCE_TIME_MS
-#define BITS_BTN_DEBOUNCE_TIME_MS            (40)
+#define BITS_BTN_DEBOUNCE_TIME_MS             (40)
 #endif
 
-#define BITS_BTN_SHORT_TIME_MS               (350)
-#define BITS_BTN_LONG_PRESS_START_TIME_MS    (1000)
-#define BITS_BTN_LONG_PRESS_PERIOD_TRIGER_MS (1000)
-#define BITS_BTN_TIME_WINDOW_TIME_MS         (300)
+#define BITS_BTN_SHORT_TIME_MS                (350)
+#define BITS_BTN_LONG_PRESS_START_TIME_MS     (1000)
+#define BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS (1000)
+#define BITS_BTN_TIME_WINDOW_TIME_MS          (300)
 
 #define BITS_BTN_NONE_PRESS_KV              0
 #define BITS_BTN_SINGLE_CLICK_KV            0b010
@@ -65,9 +65,9 @@ typedef enum {
 #define BITS_BTN_SINGLE_CLICK_THEN_LONG_PRESS_KV     0b01011
 #define BITS_BTN_DOUBLE_CLICK_THEN_LONG_PRESS_KV     0b0101011
 
-#define BITS_BTN_LONG_PRESEE_START_KV       0b011
-#define BITS_BTN_LONG_PRESEE_HOLD_KV        0b0111
-#define BITS_BTN_LONG_PRESEE_HOLD_END_KV    0b01110
+#define BITS_BTN_LONG_PRESS_START_KV       0b011
+#define BITS_BTN_LONG_PRESS_HOLD_KV        0b0111
+#define BITS_BTN_LONG_PRESS_HOLD_END_KV    0b01110
 
 
 #ifndef ARRAY_SIZE
@@ -107,7 +107,7 @@ typedef struct bits_btn_obj_param
 {
     uint16_t short_press_time_ms;
     uint16_t long_press_start_time_ms;
-    uint16_t long_press_period_triger_ms;
+    uint16_t long_press_period_trigger_ms;
     uint16_t time_window_time_ms;
 } bits_btn_obj_param_t;
 
