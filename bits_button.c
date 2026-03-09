@@ -447,15 +447,6 @@ int32_t bits_button_init(const bits_btn_config_t *config)
         return BITS_BTN_ERR_TOO_MANY_BUTTONS;
     }
 
-    memset(button, 0, sizeof(bits_button_t));
-
-    button->btns = config->btns;
-    button->btns_cnt = config->btns_cnt;
-    button->btns_combo = config->btns_combo;
-    button->btns_combo_cnt = config->btns_combo_cnt;
-    button->_read_button_level = config->read_button_level_func;
-    button->bits_btn_result_cb = config->bits_btn_result_cb;
-
     if (config->btns_combo_cnt > BITS_BTN_MAX_COMBO_BUTTONS)
     {
         if (debug_printf)
@@ -503,6 +494,17 @@ int32_t bits_button_init(const bits_btn_config_t *config)
         }
     }
 
+    // All validations passed, now modify global state
+    memset(button, 0, sizeof(bits_button_t));
+
+    button->btns = config->btns;
+    button->btns_cnt = config->btns_cnt;
+    button->btns_combo = config->btns_combo;
+    button->btns_combo_cnt = config->btns_combo_cnt;
+    button->_read_button_level = config->read_button_level_func;
+    button->bits_btn_result_cb = config->bits_btn_result_cb;
+
+    // Calculate combo_mask after btns_combo is assigned
     for(uint16_t i = 0; i < config->btns_combo_cnt; i++)
     {
         button_obj_combo_t *combo = &button->btns_combo[i];
@@ -577,6 +579,9 @@ uint8_t bits_button_peek_key_result(bits_btn_result_t *result)
 void bits_button_reset_states(void)
 {
     bits_button_t *button = &bits_btn_entity;
+
+    if (button->_read_button_level == NULL || button->btns == NULL)
+        return;
 
     if (debug_printf)
         debug_printf("Resetting all button states\n");
@@ -910,6 +915,10 @@ static void dispatch_unsuppressed_buttons(bits_button_t *button, button_mask_typ
 void bits_button_ticks(void)
 {
     bits_button_t *button = &bits_btn_entity;
+
+    if (button->_read_button_level == NULL || button->btns == NULL)
+        return;
+
     uint32_t current_time = get_button_tick();
 
     button->btn_tick++;
