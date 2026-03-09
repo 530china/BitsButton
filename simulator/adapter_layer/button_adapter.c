@@ -48,7 +48,6 @@ int my_log_printf(const char* format, ...) {
 
 static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-                                                  .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 button_obj_t btns[] =
 {

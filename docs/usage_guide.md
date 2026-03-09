@@ -45,7 +45,7 @@ BitsButton 的核心是一个基于时间窗口（Time Window）的有限状态�
 ### 关键机制说明
 
 1. **消抖处理（Debounce）**：
-   - 物理按下必须持续超过 `short_press_time_ms` 才会进入 `PRESSED` 状态。小于此时间的抖动会被丢弃。
+   - 物理按下必须持续超过 `BITS_BTN_DEBOUNCE_TIME_MS`（默认 40ms）才会进入 `PRESSED` 状态。小于此时间的抖动会被丢弃。该宏可在编译时覆盖。
 2. **多击判定窗口（Release Window）**：
    - 当用户松开按键（`RELEASE`）时，系统**不会立即判定动作结束**，而是进入等待窗口。
    - 只有在 `time_window_time_ms` 时间内没有新的按下动作，系统才会抛出终结事件 `BTN_EVENT_FINISH`。
@@ -101,7 +101,6 @@ typedef enum
 // 2. 定义按键参数、单按键实例、组合按键实例
 static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-                                                  .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 
 button_obj_t btns[] =
@@ -272,7 +271,6 @@ typedef enum
 // 2. 定义按键参数、单按键实例、组合按键实例
 static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-                                                  .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 button_obj_t btns[] =
 {

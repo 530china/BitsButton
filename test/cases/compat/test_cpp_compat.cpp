@@ -11,7 +11,6 @@ namespace test_namespace {
     // 测试在命名空间中使用库
     static void test_in_namespace() {
         const bits_btn_obj_param_t param = {
-            .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
             .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
@@ -32,7 +31,6 @@ public:
     ButtonManager() {
         // 测试在构造函数中初始化
         param = {
-            .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
             .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
@@ -93,7 +91,6 @@ int main() {
         // 1. 基本结构体初始化测试
         std::cout << "1. 测试基本结构体初始化..." << std::endl;
         const bits_btn_obj_param_t test_param = {
-            .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
             .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
             .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
@@ -127,7 +124,6 @@ int main() {
         // 5. 所有宏定义可用性测试
         std::cout << "5. 测试宏定义..." << std::endl;
         uint32_t time_values[] = {
-            BITS_BTN_SHORT_TIME_MS,
             BITS_BTN_LONG_PRESS_START_TIME_MS,
             BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
             BITS_BTN_TIME_WINDOW_TIME_MS,
@@ -193,8 +189,7 @@ int main() {
 
         // 基本验证
         if (test_button.key_id == 1 &&
-            test_combo.key_count == 2 &&
-            test_param.short_press_time_ms == BITS_BTN_SHORT_TIME_MS) {
+            test_combo.key_count == 2) {
             std::cout << "🎉 所有C++兼容性测试通过！" << std::endl;
             return 0;  // 成功
         } else {

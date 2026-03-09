@@ -96,7 +96,6 @@ void test_custom_parameters(void) {
     
     // 创建自定义参数 - 使用更合理的参数值
     static const bits_btn_obj_param_t custom_param = {
-        .short_press_time_ms = 200,       // 自定义短按时间
         .long_press_start_time_ms = 1500, // 自定义长按时间（稍短一些）
         .long_press_period_trigger_ms = 500, // 自定义长按周期
         .time_window_time_ms = 400        // 自定义时间窗口（稍短一些）
