@@ -173,7 +173,6 @@ typedef struct button_obj_t {
 ```c
 typedef struct bits_btn_obj_param
 {
-    uint16_t short_press_time_ms;                        // 短按时间(ms)
     uint16_t long_press_start_time_ms;                   // 长按开始时间(ms)
     uint16_t long_press_period_trigger_ms;                // 长按周期触发时间(ms)
     uint16_t time_window_time_ms;                        // 时间窗口时间(ms)

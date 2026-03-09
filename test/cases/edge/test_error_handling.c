@@ -121,7 +121,6 @@ void test_boundary_values(void) {
 
     // 测试极端的参数值
     static const bits_btn_obj_param_t extreme_param = {
-        .short_press_time_ms = 1,           // 极短时间
         .long_press_start_time_ms = 65535,  // 极长时间
         .long_press_period_trigger_ms = 1,   // 极短周期
         .time_window_time_ms = 65535        // 极长窗口

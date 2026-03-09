@@ -26,7 +26,6 @@ typedef enum
 // 2. 定义按键参数、单按键实例、组合按键实例
 static const bits_btn_obj_param_t default_param = {.long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS,
                                                   .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
-                                                  .short_press_time_ms = BITS_BTN_SHORT_TIME_MS,
                                                   .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS};
 
 button_obj_t btns[] =

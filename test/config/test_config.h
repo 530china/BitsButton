@@ -33,14 +33,12 @@
 #define TEST_DEFAULT_PARAM() { \
     .long_press_period_trigger_ms = BITS_BTN_LONG_PRESS_PERIOD_TRIGGER_MS, \
     .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS, \
-    .short_press_time_ms = BITS_BTN_SHORT_TIME_MS, \
     .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS \
 }
 
 #define TEST_FAST_LONG_PRESS_PARAM() { \
     .long_press_period_trigger_ms = 500, \
     .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS, \
-    .short_press_time_ms = BITS_BTN_SHORT_TIME_MS, \
     .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS \
 }
 
