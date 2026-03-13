@@ -130,9 +130,7 @@ void test_long_press_period_boundary(void) {
     
     // 如果没有长按保持事件，说明这个功能可能没有实现或有问题
     if (hold_count == 0) {
-        printf("注意: 长按周期功能可能未完全实现，跳过此测试\n");
-        printf("长按周期边界测试通过: 基本长按功能正常\n");
-        return;
+        TEST_IGNORE_MESSAGE("长按周期功能未触发保持事件，跳过此验证");
     }
     
     ASSERT_LONG_PRESS_COUNT(1, 1);

@@ -9,7 +9,7 @@
 // 基础功能测试
 extern void test_single_click_event(void);
 extern void test_double_click_event(void);
-extern void test_triple_click_event(void);
+extern void test_fast_double_click_event(void);
 extern void test_long_press_event(void);
 extern void test_long_press_hold_event(void);
 extern void test_state_reset_functionality(void);
@@ -113,7 +113,7 @@ int main(void) {
     printf("【单按键基础功能测试】\n");
     RUN_TEST(test_single_click_event);
     RUN_TEST(test_double_click_event);
-    RUN_TEST(test_triple_click_event);
+    RUN_TEST(test_fast_double_click_event);
     RUN_TEST(test_long_press_event);
     RUN_TEST(test_long_press_hold_event);
     RUN_TEST(test_state_reset_functionality);

@@ -99,11 +99,10 @@ int main(void) {
 测试配置文件位于`test/config/test_config.h`，包含以下参数：
 
 ```c
-#define MAX_TEST_EVENTS 100        // 最大测试事件数
-#define TEST_TIMEOUT_MS 5000       // 测试超时时间
-#define DEBOUNCE_TIME_MS 20        // 消抖时间
-#define LONG_PRESS_TIME_MS 1000    // 长按时间
-#define DOUBLE_CLICK_TIME_MS 300   // 双击时间窗口
+#define MAX_CAPTURED_EVENTS           100    // 最大捕获事件数
+#define TEST_DEBOUNCE_TIME_MS         BITS_BTN_DEBOUNCE_TIME_MS       // 消抖时间 (默认40ms)
+#define TEST_LONG_PRESS_TIME_MS       BITS_BTN_LONG_PRESS_START_TIME_MS // 长按开始时间 (默认1000ms)
+#define TEST_TIME_WINDOW_MS           BITS_BTN_TIME_WINDOW_TIME_MS    // 多击时间窗口 (默认300ms)
 ```
 
 ## 测试工具

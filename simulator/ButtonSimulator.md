@@ -9,21 +9,16 @@
 simulator/
 ├── adapter_layer/           # C语言适配层
 │   ├── button_adapter.c     # 适配层实现（连接C库和Python模拟器）
-│   ├── button_adapter.h     # 适配层接口定义
-│   ├── button_types.h       # 按键类型定义
-│   └── Makefile             # 编译配置
+│   └── button_adapter.h     # 适配层接口定义
 ├── python_simulator/        # Python实现的模拟器
 │   ├── advanced_v2_sim.py   # 高级模拟器实现
-│   ├── button_ctrl.py       # 按键控制逻辑
-│   ├── button_ui.py         # 用户界面实现
-│   ├── event_logger.py      # 事件日志记录
-│   └── config_manager.py    # 配置管理
+│   └── button_ctrl.py      # 按键控制逻辑
 ├── key_bindings.json        # 按键绑定配置文件
 ├── run.py                   # 主运行脚本
 ├── output/                  # 编译输出目录
-│   ├── libbutton.dll        # Windows动态库
-│   ├── libbutton.so         # Linux动态库
-│   └── libbutton.dylib      # macOS动态库
+│   ├── button.dll           # Windows动态库
+│   ├── button.so            # Linux动态库
+│   └── button.dylib         # macOS动态库
 └── ButtonSimulator.md       # 本文档
 ```
 

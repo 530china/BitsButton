@@ -249,7 +249,7 @@ static uint8_t bits_btn_peek_buffer_c11(bits_btn_result_t *result)
     return true;
 }
 
-const bits_btn_buffer_ops_t c11_buffer_ops = {
+static const bits_btn_buffer_ops_t c11_buffer_ops = {
     .init = bits_btn_init_buffer_c11,
     .write = bits_btn_write_buffer_overwrite_c11,
     .read = bits_btn_read_buffer_c11,
@@ -271,10 +271,7 @@ static bits_btn_result_user_filter_callback bits_btn_result_user_filter_cb = NUL
 
 void bits_btn_register_result_filter_callback(bits_btn_result_user_filter_callback cb)
 {
-    if(cb != NULL)
-    {
-        bits_btn_result_user_filter_cb = cb;
-    }
+    bits_btn_result_user_filter_cb = cb;
 }
 #endif
 
