@@ -167,6 +167,7 @@ typedef struct button_obj_t {
     state_bits_type_t state_bits;                       // 状态位图
     const bits_btn_obj_param_t *param;                  // 参数指针
 } button_obj_t;
+```
 
 ### 按键对象参数结构
 

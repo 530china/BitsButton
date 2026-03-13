@@ -1,5 +1,6 @@
 // 1. 包含头文件
 #include "bits_button.h"
+#include <stdarg.h>
 
 typedef enum
 {

@@ -46,7 +46,7 @@ test/
 ### 基础功能测试 (7个)
 1. **test_single_click_event** - 单击事件测试
 2. **test_double_click_event** - 双击事件测试
-3. **test_triple_click_event** - 快速双击测试
+3. **test_fast_double_click_event** - 快速双击测试
 4. **test_long_press_event** - 长按事件测试
 5. **test_long_press_hold_event** - 长按保持测试
 6. **test_state_reset_functionality** - 按键状态重置功能测试
@@ -170,11 +170,10 @@ make
 
 ### 测试配置 (test/config/test_config.h)
 ```c
-#define MAX_TEST_EVENTS 100        // 最大测试事件数
-#define TEST_TIMEOUT_MS 5000       // 测试超时时间
-#define DEBOUNCE_TIME_MS 20        // 消抖时间
-#define LONG_PRESS_TIME_MS 1000    // 长按时间
-#define DOUBLE_CLICK_TIME_MS 300   // 双击时间窗口
+#define MAX_CAPTURED_EVENTS           100    // 最大捕获事件数
+#define TEST_DEBOUNCE_TIME_MS         BITS_BTN_DEBOUNCE_TIME_MS       // 消抖时间 (默认40ms)
+#define TEST_LONG_PRESS_TIME_MS       BITS_BTN_LONG_PRESS_START_TIME_MS // 长按开始时间 (默认1000ms)
+#define TEST_TIME_WINDOW_MS           BITS_BTN_TIME_WINDOW_TIME_MS    // 多击时间窗口 (默认300ms)
 ```
 
 ## 测试工具

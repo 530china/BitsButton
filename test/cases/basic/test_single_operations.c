@@ -23,11 +23,11 @@ void basic_tearDown(void) {
 
 void test_single_click_event(void) {
     printf("\n=== 测试单击事件 ===\n");
-    
+
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    
+
     bits_btn_config_t config = {
         .btns = &button,
         .btns_cnt = 1,
@@ -50,11 +50,11 @@ void test_single_click_event(void) {
 
 void test_double_click_event(void) {
     printf("\n=== 测试双击事件 ===\n");
-    
+
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    
+
     bits_btn_config_t config = {
         .btns = &button,
         .btns_cnt = 1,
@@ -73,15 +73,15 @@ void test_double_click_event(void) {
     printf("双击测试通过\n");
 }
 
-// ==================== 三连击测试 ====================
+// ==================== 快速双击测试 ====================
 
-void test_triple_click_event(void) {
+void test_fast_double_click_event(void) {
     printf("\n=== 测试双击事件(快速) ===\n");
-    
+
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    
+
     bits_btn_config_t config = {
         .btns = &button,
         .btns_cnt = 1,
@@ -91,7 +91,7 @@ void test_triple_click_event(void) {
     };
     bits_button_init(&config);
 
-    // 模拟快速双击（库不支持三连击，所以测试双击）
+    // 模拟快速双击
     mock_multiple_clicks(1, 2, STANDARD_CLICK_TIME_MS, 150);
     time_simulate_time_window_end();
 
@@ -104,11 +104,11 @@ void test_triple_click_event(void) {
 
 void test_long_press_event(void) {
     printf("\n=== 测试长按事件 ===\n");
-    
+
     // 创建按键对象
     static const bits_btn_obj_param_t param = TEST_DEFAULT_PARAM();
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    
+
     bits_btn_config_t config = {
         .btns = &button,
         .btns_cnt = 1,
@@ -135,16 +135,16 @@ void test_long_press_event(void) {
 
 void test_long_press_hold_event(void) {
     printf("\n=== 测试长按保持事件 ===\n");
-    
+
     // 创建按键对象，设置较短的长按周期
     static const bits_btn_obj_param_t param = {
         .long_press_period_trigger_ms = 500,
         .long_press_start_time_ms = BITS_BTN_LONG_PRESS_START_TIME_MS,
         .time_window_time_ms = BITS_BTN_TIME_WINDOW_TIME_MS
     };
-    
+
     button_obj_t button = BITS_BUTTON_INIT(1, 1, &param);
-    
+
     bits_btn_config_t config = {
         .btns = &button,
         .btns_cnt = 1,

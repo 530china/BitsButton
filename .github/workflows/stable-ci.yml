@@ -117,8 +117,8 @@ jobs:
     - name: 运行基础静态分析
       run: |
         # 只检查严重错误，忽略风格问题
-        cppcheck --enable=error,warning \
+        cppcheck --enable=warning \
           --error-exitcode=1 \
           --suppress=missingIncludeSystem \
           --suppress=missingInclude \
-          bits_button.c bits_button.h || echo "静态分析完成，发现一些风格问题但不影响功能"
+          bits_button.c bits_button.h
